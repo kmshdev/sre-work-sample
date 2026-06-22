@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
     <title>SRE Take-Home: Market Data Freshness</title>
     <style>
       :root {
@@ -1010,9 +1011,9 @@
               <div class="eyebrow">Welcome</div>
               <h2 id="onboarding-title">First steps</h2>
               <p>
-                Your onboarding checklist sits in the bottom right. Tick it off
-                as you collect evidence for the Market Data Freshness
-                assignment.
+                Your onboarding checklist sits in the bottom right. Use it as a
+                static sequence while you collect evidence for the Market Data
+                Freshness assignment.
               </p>
               <div class="tiles">
                 <div class="tile"></div>
@@ -1060,7 +1061,7 @@
             </button>
             <ol id="checklist" class="steps">
               <li class="step done">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">OK</span
                   ><span class="step-text"
                     ><span class="step-title">Clone and install</span
@@ -1069,10 +1070,10 @@
                       or no-error output.</span
                     ></span
                   ><span class="icon">[]</span>
-                </button>
+                </div>
               </li>
               <li class="step done">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">OK</span
                   ><span class="step-text"
                     ><span class="step-title">Run the baseline</span
@@ -1081,10 +1082,10 @@
                       Evidence: smoke JSON.</span
                     ></span
                   ><span class="icon">!!</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Trigger stale bravo</span
@@ -1094,10 +1095,10 @@
                       <code>unsafe_feeds</code>.</span
                     ></span
                   ><span class="icon">()</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Recover bravo</span
@@ -1107,10 +1108,10 @@
                       <code>eligible</code>.</span
                     ></span
                   ><span class="icon">-&gt;</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Document the health model</span
@@ -1119,10 +1120,10 @@
                       freshness, and eligibility.</span
                     ></span
                   ><span class="icon">##</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Write operations evidence</span
@@ -1131,10 +1132,10 @@
                       block, and recovery proof.</span
                     ></span
                   ><span class="icon">&lt;&gt;</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Complete submission files</span
@@ -1143,10 +1144,10 @@
                       <code>INCIDENT_NOTE.md</code>, and AI/defense notes.</span
                     ></span
                   ><span class="icon">[]</span>
-                </button>
+                </div>
               </li>
               <li class="step">
-                <button class="step-row" type="button">
+                <div class="step-row">
                   <span class="mark">--</span
                   ><span class="step-text"
                     ><span class="step-title">Run final validation</span
@@ -1155,7 +1156,7 @@
                       <code>make docs-check</code>.</span
                     ></span
                   ><span class="icon">OK</span>
-                </button>
+                </div>
               </li>
             </ol>
           </section>
@@ -1170,11 +1171,11 @@
         <div class="focus-shell">
           <div class="focus-progress" aria-hidden="true"></div>
           <header class="focus-bar">
-            <button class="focus-button" type="button">
+            <div class="focus-button" aria-hidden="true">
               <span aria-hidden="true">[-]</span>Exit focus<span class="kbd"
                 >ESC</span
               >
-            </button>
+            </div>
           </header>
           <aside class="focus-left" aria-hidden="true"></aside>
           <aside class="focus-right" aria-hidden="true"></aside>
@@ -1291,31 +1292,27 @@
             <p>SRE - Submission review - 10 visible of 10</p>
           </div>
           <div class="actions">
-            <button class="button" type="button">Group: Gate</button>
-            <button class="button primary" type="button">+ New evidence</button>
+            <span class="button">Group: Gate</span>
+            <span class="button primary">+ New evidence</span>
           </div>
         </header>
 
         <section class="board" aria-label="Evidence issue table">
           <div class="filters">
-            <label class="input">
+            <div class="input">
               <span aria-hidden="true">Search</span>
-              <input
-                type="search"
-                placeholder="Search tasks..."
-                aria-label="Search evidence tasks"
-              />
-            </label>
+              <span class="placeholder">Search tasks...</span>
+            </div>
             <span class="sep" aria-hidden="true"></span>
-            <button class="button active" type="button">
+            <span class="button active">
               Status <span class="badge secondary">Todo</span>
-            </button>
-            <button class="button active" type="button">
+            </span>
+            <span class="button active">
               Priority <span class="badge secondary">High</span>
-            </button>
-            <button class="button dashed" type="button">Assignee</button>
-            <button class="button dashed" type="button">Label</button>
-            <button class="button dashed" type="button">+ Add filter</button>
+            </span>
+            <span class="button dashed">Assignee</span>
+            <span class="button dashed">Label</span>
+            <span class="button dashed">+ Add filter</span>
             <span class="count"><strong>3 filters</strong> active</span>
           </div>
 

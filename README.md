@@ -1,38 +1,109 @@
 # SRE Take-Home: Market Data Freshness
 
-Open the live assignment packet first:
-<https://kmshdev.github.io/sre-work-sample/artifacts/>.
+This is the starter template for a senior SRE take-home assignment. You will
+operate a small local market-data freshness system with three fictional feeds:
+`alpha`, `bravo`, and `charlie`.
 
-This repository is the starter template for the assignment. It gives you a small
-Python command-line application, three fictional market-data feeds, tests, and a
-GitHub Actions workflow. Your job is to make the local system operationally
-credible.
+Your goal is not to build a trading platform. Your goal is to show that stale
+data is detected, unsafe work fails closed, healthy feeds remain eligible, and
+recovery can be reproduced by another engineer.
+
+Open the single-page candidate guide first:
+<https://kmshdev.github.io/sre-work-sample/artifacts/>.
 
 The assessment window is **6 calendar days**. Expect **6-8 focused hours**.
 
+Last reviewed: 2026-06-22.
+
 ## Table of contents
 
-- [Start with the runnable baseline](#start-with-the-runnable-baseline)
-- [Use each assignment file for one job](#use-each-assignment-file-for-one-job)
-- [Make freshness the operating problem](#make-freshness-the-operating-problem)
-- [Pass the hard gates first](#pass-the-hard-gates-first)
-- [Separate liveness from safe-to-serve eligibility](#separate-liveness-from-safe-to-serve)
-- [Show evidence another engineer can rerun](#show-evidence-another-engineer-can-rerun)
-- [Use GitHub Actions as the delivery gate](#use-github-actions-as-the-delivery-gate)
-- [Write the incident note in the submission](#write-the-incident-note-in-the-submission)
-- [Keep the review local and safe](#keep-the-review-local-and-safe)
-- [Disclose AI tool use](#disclose-ai-tool-use)
-- [Prepare for the follow-up interview](#prepare-for-the-follow-up-interview)
+- [Start here](#start-here)
+- [What you are building](#what-you-are-building)
+- [What is already in the repo](#what-is-already-in-the-repo)
+- [Required candidate flow](#required-candidate-flow)
+- [Hard gates](#hard-gates)
+- [Health model](#health-model)
+- [Evidence to submit](#evidence-to-submit)
+- [Incident prompt](#incident-prompt)
+- [Constraints](#constraints)
+- [AI usage](#ai-usage)
+- [Follow-up interview](#follow-up-interview)
 
-## Start with the runnable baseline
+## Start here
 
-Run the starter before changing it:
+Run the baseline before changing anything:
 
 ```sh
 make setup
 make test
 make smoke
 ```
+
+Expected smoke result:
+
+```json
+{
+  "checks": [
+    "healthy feeds eligible",
+    "stale bravo fails closed",
+    "alpha and charlie remain eligible",
+    "bravo recovery restores eligibility"
+  ],
+  "smoke": "passed"
+}
+```
+
+The browser guide at `artifacts/index.html` contains the same assignment as one
+page. Use it for navigation and review checklists. Use this README as the
+authoritative specification when instructions differ.
+
+## What you are building
+
+Build a small local system that makes market-data freshness operationally clear.
+At minimum, your implementation must show:
+
+- All three feeds have a visible status.
+- A feed can be alive while its data is stale.
+- Stale or unknown data blocks unsafe downstream work.
+- If `bravo` is stale, `alpha` and `charlie` can remain eligible.
+- Recovery restores eligibility through a rerunnable command or workflow.
+- Tests, smoke output, GitHub Actions, and written evidence prove the behavior.
+
+## What is already in the repo
+
+| Path | Purpose |
+| --- | --- |
+| `artifacts/index.html` | Single-page browser guide for the assignment. |
+| `src/sre_work_sample/` | Starter Python package and CLI entry points. |
+| `tests/` | Behavior tests for the starter freshness model. |
+| `data/healthy.json` | Simple healthy-state fixture. |
+| `docs/ARCHITECTURE.md` | Fill this with health-model and design notes. |
+| `docs/OPERATIONS.md` | Fill this with runbooks, alerts, and recovery notes. |
+| `.github/workflows/validate.yml` | CI workflow for tests, smoke, and docs checks. |
+| `SUBMISSION_TEMPLATE.md` | Suggested structure for `SUBMISSION.md`. |
+| `SUBMISSION.md` | Your completed submission report. |
+| `INCIDENT_NOTE.md` | Your first-30-minute stale-feed incident note. |
+| `AI_USAGE.md` | AI tool disclosure and verification notes. |
+| `DEFENSE_NOTES.md` | Notes for follow-up technical discussion. |
+
+You may change the starter code. Keep setup, tests, smoke, and docs validation
+working from a fresh checkout.
+
+## Required candidate flow
+
+Use this flow to prove the assignment end to end:
+
+1. Run `make setup`.
+2. Run `make test`.
+3. Run `make smoke`.
+4. Show healthy status for `alpha`, `bravo`, and `charlie`.
+5. Trigger a stale `bravo` scenario.
+6. Show `bravo` is unsafe while `alpha` and `charlie` remain eligible.
+7. Recover `bravo`.
+8. Show the recovered state is eligible.
+9. Push or otherwise show GitHub Actions evidence.
+10. Complete `SUBMISSION.md`, `INCIDENT_NOTE.md`, `AI_USAGE.md`, and
+    `DEFENSE_NOTES.md`.
 
 Useful direct commands:
 
@@ -48,74 +119,26 @@ tmp=/tmp/bravo-stale.json
 .venv/bin/python -m sre_work_sample.cli status --state /tmp/bravo-recovered.json
 ```
 
-The starter includes:
+## Hard gates
 
-- `src/sre_work_sample/` for the freshness model and command-line interface.
-- `tests/` for behavior tests.
-- `data/healthy.json` for a simple fixture.
-- `docs/ARCHITECTURE.md` for health-model and design notes.
-- `docs/OPERATIONS.md` for runbooks, alerts, and recovery steps.
-- `evidence/` for logs, screenshots, transcripts, and command output.
-- `.github/workflows/validate.yml` for repeatable validation.
-- `SUBMISSION.md`, `AI_USAGE.md`, `INCIDENT_NOTE.md`, and `DEFENSE_NOTES.md`
-  placeholders.
+The reviewer may stop early if any hard gate fails:
 
-You may change the starter. Keep the fresh-checkout path and smoke command
-working.
+- Fresh checkout setup works.
+- `make test` passes.
+- `make smoke` proves healthy, stale, and recovered states.
+- GitHub Actions runs setup, tests, smoke, and docs validation.
+- A stale feed is detected.
+- Unsafe downstream work fails closed.
+- Unaffected fresh feeds remain eligible during partial failure.
+- Recovery is reproducible.
+- `INCIDENT_NOTE.md` is credible and concise.
+- No real accounts, secrets, paid services, or cloud deployment are required.
 
-## Use each assignment file for one job
+## Health model
 
-| File | Purpose |
-| --- | --- |
-| `artifacts/index.html` | Single-page browser guide for the candidate packet. |
-| `README.md` | Authoritative assignment specification. |
-| `SUBMISSION_TEMPLATE.md` | Structure for the final report in `SUBMISSION.md`. |
-| `SUBMISSION.md` | Your completed report. |
-| `AI_USAGE.md` | Disclosure and verification notes for AI-assisted work. |
-| `INCIDENT_NOTE.md` | Concise first-30-minute incident response note. |
-| `DEFENSE_NOTES.md` | Notes for the follow-up technical discussion. |
+Separate liveness from safe-to-serve eligibility.
 
-## Make freshness the operating problem
-
-The fictional service has three market-data feeds:
-
-- `alpha`
-- `bravo`
-- `charlie`
-
-Each feed can be alive while its data is stale. A process that answers requests
-is not automatically safe for downstream work.
-
-Your implementation must show:
-
-- A status view for all three feeds.
-- Stale data detection for at least one feed.
-- Fail-closed behavior when a feed is stale or unknown.
-- A recovery path that restores eligibility.
-- A bad-configuration or rollback-safety note.
-- Observability evidence: freshness signal, liveness signal, page threshold, and
-  ticket threshold.
-
-## Pass the hard gates first
-
-The reviewer will stop early if a hard gate fails.
-
-- **Fresh checkout:** setup, test, smoke, and cleanup commands work.
-- **Local tests:** `make test` passes.
-- **Smoke command:** `make smoke` proves healthy, stale, and recovered states.
-- **GitHub Actions:** the workflow runs setup, tests, smoke, and docs validation.
-- **Stale feed behavior:** one feed can fail closed while others remain eligible.
-- **Recovery:** a reviewer can reproduce recovery from a stale feed state.
-- **Incident note:** `INCIDENT_NOTE.md` or the submission report answers the
-  incident prompt.
-- **Constraints:** no real accounts, paid services, or secrets are required.
-
-## Separate liveness from safe-to-serve
-
-Use `docs/ARCHITECTURE.md` and the evaluation section in `artifacts/index.html`
-to explain the health model.
-
-At minimum, make these fields visible:
+Make these fields visible in code, CLI output, tests, docs, or evidence:
 
 - `alive`: whether the feed consumer can answer.
 - `last_tick_age_seconds`: age of the newest known tick.
@@ -124,38 +147,26 @@ At minimum, make these fields visible:
 - `allowed_actions`: work still permitted for the feed.
 - `blocked_reason`: why unsafe work is blocked.
 
-Strong submissions make partial failure obvious. If only `bravo` is stale,
-`bravo` should fail closed while `alpha` and `charlie` remain eligible.
+The important distinction: a process can be alive and still unsafe because its
+data is stale.
 
-## Show evidence another engineer can rerun
+## Evidence to submit
 
-Evidence should be concrete. Prefer command output, workflow logs, JSON, test
-output, and short notes over long prose.
+Prefer command output, JSON, test output, CI links, and short notes. Evidence
+should let another engineer rerun your proof without guessing.
 
 Include evidence for:
 
-- Healthy status.
-- Stale `bravo` or another chosen feed.
-- Blocked unsafe actions.
-- Recovery.
+- Healthy baseline.
+- Stale `bravo` or another explicitly chosen feed.
+- Blocked unsafe action.
+- Continued eligibility for unaffected feeds.
+- Recovery output.
 - GitHub Actions validation.
-- Alert thresholds and owner/action notes.
+- Alert rationale: what pages, what creates a ticket, and why.
+- Bad-config detection or rollback judgment.
 
-Use the evidence task section in `artifacts/index.html` to check evidence
-quality.
-
-## Use GitHub Actions as the delivery gate
-
-GitHub Actions is required. The included workflow runs:
-
-- Python install.
-- Unit tests.
-- Smoke check.
-- Candidate documentation validation.
-
-You may extend the workflow. Keep it fast and deterministic.
-
-## Write the incident note in the submission
+## Incident prompt
 
 Answer this prompt in `INCIDENT_NOTE.md` or inside `SUBMISSION.md`:
 
@@ -164,12 +175,12 @@ Answer this prompt in `INCIDENT_NOTE.md` or inside `SUBMISSION.md`:
 > Operators ask whether downstream work should continue. What do you do in the
 > first 30 minutes?
 
-Cover severity, first five checks, the block/allow decision, notification,
+Cover severity, first checks, block/allow decision, notification,
 operator-facing status, first runbook action, and closure evidence.
 
-## Keep the review local and safe
+## Constraints
 
-Follow these constraints:
+Keep the review local and safe:
 
 - Do not include real secrets.
 - Do not require paid infrastructure.
@@ -177,9 +188,9 @@ Follow these constraints:
 - Do not connect to real trading, broker, exchange, or customer systems.
 - Do not hide failure behind restart-only recovery.
 - Do not make Kubernetes, Terraform, DNS, BGP, or cloud deployment required.
-- Do not spend time on visual polish at the cost of operational evidence.
+- Do not trade operational evidence for dashboard polish.
 
-## Disclose AI tool use
+## AI usage
 
 AI coding tools are allowed. You own the output.
 
@@ -194,17 +205,16 @@ If you use AI tools, complete `AI_USAGE.md` with:
 
 If you do not use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
 
-## Prepare for the follow-up interview
+## Follow-up interview
 
-Expect questions about:
+Be ready to discuss:
 
-- How the health model blocks unsafe work.
-- Which alert pages and which alert only creates a ticket.
-- How to roll out a feed freshness threshold safely.
-- How the model would scale from three feeds to many feed boundaries.
-- What Kubernetes, Terraform, managed continuous integration, or edge
-  infrastructure would add.
-- How you used or avoided AI tools.
+- Why your model blocks unsafe work.
+- Which stale-data alert pages and which alert only creates a ticket.
+- How a freshness threshold would roll out safely.
+- How the model would scale beyond three feeds.
+- What Kubernetes, Terraform, CI/CD, or edge infrastructure would add later.
+- What AI suggestion you rejected or corrected.
 - What you would change before production.
 
 Invite `kmshdev` as a collaborator or reviewer only after the report and
