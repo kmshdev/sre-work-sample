@@ -1,6 +1,9 @@
 # Defense Notes
 
-Before submission, fill this with:
+Use this file to prepare for the follow-up technical discussion. The reviewer
+should learn what you can defend, what you would change, and which risks remain.
+
+Before submission, fill this in with:
 
 - Three design decisions you expect to defend.
 - One thing you would redesign with more time.

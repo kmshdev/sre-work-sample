@@ -87,14 +87,24 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Evidence and validation guide</p>
-      <h1>Proof beats explanation.</h1>
+      <h1 id="page-title">Proof beats explanation.</h1>
       <p>
         The work sample does not need production breadth. It does need proof
         that the local slice starts, fails visibly, blocks unsafe work, recovers,
         and can be inspected by another engineer.
       </p>
+    </section>
+
+    <section class="section card" aria-labelledby="toc-title">
+      <p class="eyebrow">Table of contents</p>
+      <h2 id="toc-title">Collect evidence that survives review.</h2>
+      <ul>
+        <li><a href="#minimum-title">Capture evidence where the reviewer looks first.</a></li>
+        <li><a href="#quality-title">Strong evidence is concrete and rerunnable.</a></li>
+        <li><a href="#files-title">Put proof where reviewers can find it.</a></li>
+      </ul>
     </section>
 
     <section class="section card" aria-labelledby="minimum-title">

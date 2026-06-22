@@ -1,4 +1,4 @@
-.PHONY: setup test smoke run clean
+.PHONY: setup test smoke docs-check run clean
 
 PYTHON ?= python3
 VENV ?= .venv
@@ -14,6 +14,9 @@ test:
 
 smoke:
 	$(VENV)/bin/python -m sre_work_sample.cli smoke
+
+docs-check:
+	$(PYTHON) scripts/validate_candidate_docs.py
 
 run:
 	$(VENV)/bin/python -m sre_work_sample.server --port $(PORT)

@@ -1,7 +1,7 @@
 # Architecture Notes
 
-Replace this starter note with the architecture you actually built. Keep the
-section useful for a reviewer who is deciding what to run first.
+Use this file to explain the shape of the system you built. The reviewer should
+learn what runs locally, where state lives, and which tradeoffs are intentional.
 
 ## System Shape
 

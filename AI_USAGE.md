@@ -1,6 +1,9 @@
 # AI Usage
 
-State whether you used AI coding tools.
+Use this file to show how you supervised any AI-assisted work.
+
+If you did not use AI coding tools, write that clearly and keep the rest of the
+file short.
 
 If you did, include:
 

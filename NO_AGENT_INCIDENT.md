@@ -2,6 +2,9 @@
 
 Complete this file without coding agents or LLMs.
 
+The reviewer should learn how you reason during the first 30 minutes of an
+incident when the process is running but operating data may be stale.
+
 Prompt:
 
 > At 09:37, the operator surface is reachable and API latency is normal, but

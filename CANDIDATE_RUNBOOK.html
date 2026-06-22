@@ -91,14 +91,24 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Candidate runbook</p>
-      <h1>Make the first proof runnable early.</h1>
+      <h1 id="page-title">Make the first proof runnable early.</h1>
       <p>
-        Use the starter scaffold to get a fresh-checkout path working first.
-        Then replace the sample fleet with the smallest implementation that
-        proves your SRE operating model.
+        Start by proving that a reviewer can run the project. Then add the
+        smallest runtime-fleet slice that proves your operating model.
       </p>
+    </section>
+
+    <section class="section card" aria-labelledby="toc-title">
+      <p class="eyebrow">Table of contents</p>
+      <h2 id="toc-title">Use the runbook to sequence the work.</h2>
+      <ul>
+        <li><a href="#start-title">Run the starter before changing it.</a></li>
+        <li><a href="#week-title">Reduce review risk in this order.</a></li>
+        <li><a href="#deliver-title">Every deliverable answers a reviewer question.</a></li>
+        <li><a href="#stuck-title">When stuck, cut scope before adding tools.</a></li>
+      </ul>
     </section>
 
     <section class="section card" aria-labelledby="start-title">
@@ -121,7 +131,7 @@ make run</code></pre>
       <div class="grid">
         <article class="step">
           <h3>Day 1: Fresh checkout</h3>
-          <p>Make setup, tests, smoke, and cleanup repeatable.</p>
+          <p>Make setup, tests, smoke, and cleanup repeatable before adding scope.</p>
         </article>
         <article class="step">
           <h3>Days 2-3: Runtime model</h3>
@@ -133,7 +143,7 @@ make run</code></pre>
         </article>
         <article class="step">
           <h3>Day 6: Automation</h3>
-          <p>Wire validation, smoke, promotion thinking, and rollback notes.</p>
+          <p>Wire validation, smoke checks, promotion thinking, and rollback notes.</p>
         </article>
         <article class="step">
           <h3>Day 7: Submission</h3>
@@ -179,6 +189,18 @@ make run</code></pre>
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section class="section card" aria-labelledby="stuck-title">
+      <p class="eyebrow">Scope control</p>
+      <h2 id="stuck-title">When stuck, cut scope before adding tools.</h2>
+      <ul>
+        <li>Keep one local control surface instead of building several interfaces.</li>
+        <li>Use one mock dependency and make its failure behavior clear.</li>
+        <li>Prefer captured command output over long prose explanations.</li>
+        <li>Document future work separately from implemented behavior.</li>
+        <li>Rerun the smoke command after each scenario change.</li>
+      </ul>
     </section>
   </main>
 

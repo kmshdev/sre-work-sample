@@ -3,8 +3,9 @@
 Use this file for runbooks, alert notes, rollout decisions, and recovery
 procedures.
 
-Keep commands concrete enough that a reviewer can run them from a fresh
-checkout.
+The reviewer should learn what an operator sees, what they do next, and which
+commands prove the system recovered. Keep commands concrete enough to run from
+a fresh checkout.
 
 ## Fresh-Checkout Commands
 

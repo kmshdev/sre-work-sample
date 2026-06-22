@@ -1,30 +1,37 @@
-# 2026 SRE Take-Home: Critical Runtime Operations Platform
+# 2026 Site Reliability Engineering Work Sample
 
 Open the live assignment packet first:
 <https://kmshdev.github.io/sre-work-sample/>.
 
-This repository is both the candidate assignment packet and the runnable starter
-scaffold. This README remains the authoritative assignment specification. The
-HTML pages are the browser-friendly guide:
+Build a small local system that shows how you would operate a critical runtime
+platform. The reviewer must be able to clone your repository, run your commands,
+trigger failures, inspect evidence, and understand your tradeoffs.
 
-- [`index.html`](index.html) summarizes the task, requirements, timeline, and
-  submission route.
-- [`CANDIDATE_RUNBOOK.html`](CANDIDATE_RUNBOOK.html) gives a pacing guide.
-- [`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) explains health states.
-- [`EVIDENCE_AND_VALIDATION_GUIDE.html`](EVIDENCE_AND_VALIDATION_GUIDE.html)
-  explains proof expectations.
-- [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md) is the final report shape.
+The assessment window is **7 calendar days**.
 
-This take-home is a senior SRE work sample over 7 calendar days for someone who
-would help operate a small but critical runtime fleet. We do not expect production
-breadth. We do expect a clear operational model, repeatable local evidence,
-release-safety thinking, and tradeoffs you can defend.
+## Table of contents
 
-## Starter scaffold
+- [Starter baseline](#the-starter-gives-you-a-runnable-baseline)
+- [Assignment files](#the-assignment-files-have-one-job-each)
+- [Runtime slice](#your-task-is-to-operate-three-simulated-runtimes)
+- [Hard gates](#the-hard-gates-must-pass-before-review)
+- [Health model](#the-health-model-must-fail-closed)
+- [Evidence](#evidence-must-make-behavior-reproducible)
+- [Failure scenarios](#failure-scenarios-must-show-detection-and-recovery)
+- [Release safety](#release-safety-must-show-blast-radius-control)
+- [Submission report](#the-report-must-separate-facts-from-plans)
+- [Constraints](#the-constraints-keep-the-review-local-and-safe)
+- [AI usage](#ai-tool-use-must-be-disclosed-and-verified)
+- [No-agent incident](#the-no-agent-incident-answer-must-be-written-by-you)
+- [Follow-up interview](#the-follow-up-interview-will-test-your-tradeoffs)
 
-This repository includes a small Python 3.11 starter scaffold so you have a
-fresh-checkout path on day one. It is not a completed solution. Replace or extend
-it as needed.
+## The starter gives you a runnable baseline
+
+This repository is a starter template, not a solution. It includes a small
+Python scaffold so the first checkout already has tests, a smoke command, and a
+place for evidence.
+
+Run the starter before changing it:
 
 ```sh
 make setup
@@ -33,383 +40,223 @@ make smoke
 make run
 ```
 
-The scaffold gives you:
+The starter includes:
 
-- `src/sre_work_sample/` for the local control surface and runtime-fleet model.
+- `src/sre_work_sample/` for the local runtime model and control surface.
 - `tests/` for behavior tests.
-- `docs/` for architecture and operations notes.
-- `evidence/` for captured proof artifacts.
+- `docs/ARCHITECTURE.md` for system shape and tradeoffs.
+- `docs/OPERATIONS.md` for runbooks, alerts, and recovery steps.
+- `evidence/` for logs, screenshots, transcripts, and command output.
 - `.github/workflows/validate.yml` for repeatable validation.
 - `SUBMISSION.md`, `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and
   `DEFENSE_NOTES.md` placeholders.
 
-## Core premise
+You may replace the scaffold if another stack makes the work clearer. Keep the
+fresh-checkout path and smoke command working.
 
-This repository provides only a starter scaffold, not the assessment
-implementation. Build or assemble the smallest local system needed to
-demonstrate your operational model.
+## The assignment files have one job each
 
-Your submission must run from a fresh checkout without paid infrastructure or
-real external accounts. Use fake data, local services, disposable resources, and
-mock integrations only.
+Use the files below as the main reading path:
 
-The real-world shape is a platform with 20-50 independent runtime instances. A
-runtime is a single workload with its own identity, configuration, health, and
-external dependency boundary. The platform must help an operator answer:
+| File | Purpose |
+| --- | --- |
+| `index.html` | Browser entry point for the candidate packet. |
+| `README.md` | Authoritative assignment specification. |
+| `CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 7-day window. |
+| `HEALTH_MODEL_GUIDE.html` | Guidance for liveness, safety, and blocked work. |
+| `EVIDENCE_AND_VALIDATION_GUIDE.html` | Guidance for proof and rerunnable commands. |
+| `SUBMISSION_TEMPLATE.md` | Structure for the final report in `SUBMISSION.md`. |
+| `AI_USAGE.md` | Disclosure and verification notes for AI-assisted work. |
+| `NO_AGENT_INCIDENT.md` | Human-written incident response segment. |
+| `DEFENSE_NOTES.md` | Notes for the follow-up technical discussion. |
 
-- Which runtimes are safe to operate now?
-- Which runtimes are degraded, paused, blocked, or in incident response?
-- Which actions are allowed when data, dependencies, or rollout state are
-  uncertain?
-- How would the team detect, recover, roll back, and learn from failure?
+## Your task is to operate three simulated runtimes
 
-Your implementation should be the smallest local slice that proves those ideas.
+Build the smallest local slice that proves your operating model.
 
-## Required implementation scope
+Your implementation must include:
 
-Implement or assemble a local runtime-fleet slice with:
-
-- One control surface, such as an API, CLI, dashboard, terminal UI, or simple
-  web surface.
+- One operator control surface, such as a command-line interface, local web
+  page, terminal interface, or local application programming interface.
 - Three simulated runtimes with separate identities or configuration.
-- One mock dependency, such as a data feed, account-status service, broker
-  simulator, gateway, or equivalent fake external service.
+- One mock external dependency, such as a fake data feed, account service,
+  gateway, queue, or platform service.
 - One pause or block operation that prevents unsafe work without deleting state.
-- Health states for the states exercised by your implemented slice.
-- A repeatable delivery automation path.
-- Two implemented operational failure scenarios end to end.
+- Health states for the states exercised by your implementation.
+- A repeatable delivery path that runs validation and smoke checks.
+- Two operational failure scenarios implemented end to end.
 - One bad rollout or bad configuration scenario tied to release safety.
-- Documented plans for remaining scenarios you would implement with more time.
 
-Implement two failure scenarios end to end. Document how you would implement and
-validate the remaining scenarios with more time.
+Use fake data and local services. Do not connect to real customer, production
+account, payment, or secret-bearing systems.
 
-The release-safety scenario may count as one of the two implemented scenarios if
-it is demonstrated end to end. If it is not implemented end to end, document it
-separately with enough detail that a reviewer can see the intended validation,
-promotion, rollback, and blast-radius controls.
+## The hard gates must pass before review
 
-Depth matters more than breadth. A small, well-evidenced slice is stronger than a
-large system whose behavior cannot be started, observed, failed, and recovered
-locally.
+The reviewer will stop early if the hard gates are missing.
 
-## Fresh-checkout evidence
+- **Fresh checkout:** setup, start, smoke, and cleanup commands in `SUBMISSION.md`.
+- **Smoke command:** one command that checks control, runtimes, dependency, and
+  health in `SUBMISSION.md`.
+- **Delivery path:** repeatable validation and release-safety evidence in a
+  workflow, script, or transcript.
+- **Health model:** clear split between liveness and safe operation in
+  `docs/ARCHITECTURE.md`.
+- **Two failures:** trigger, detection, blocked work, recovery, and evidence in
+  `evidence/` and `SUBMISSION.md`.
+- **Release safety:** bad rollout or bad config implemented end to end in
+  `SUBMISSION.md`.
+- **No-agent incident:** human-written incident response in `NO_AGENT_INCIDENT.md`.
 
-Your submission must include exact commands that work from a fresh checkout.
-Assume the reviewer has cloned your repository on a new machine and has no prior
-local state.
+If a command needs a specific tool version, fake environment variable, or local
+data file, document it before the command.
 
-Include:
+## The health model must fail closed
 
-- Prerequisites and supported versions.
-- Setup commands.
-- Start commands.
-- A smoke command that verifies the control surface, runtimes, mock dependency,
-  and at least one health-state response.
-- Cleanup commands.
-- Expected output or evidence for each command.
+A running process is not always safe to operate.
 
-These fresh-checkout run commands and the smoke command are hard gates. If a
-reviewer cannot follow them without paid infrastructure or real external
-accounts, the submission will not proceed.
+Separate two questions:
 
-## Delivery automation
+- **Process liveness:** Can the runtime answer?
+- **Operational eligibility:** Is the runtime safe to perform unsafe work?
 
-Include a repeatable delivery automation path. It can use GitHub Actions, GitLab
-CI, CircleCI, Jenkins, Buildkite, ArgoCD, Flux, Make, Taskfile, or equivalent
-automation, but it must show setup, validation, smoke checks, promotion or
-deploy, and rollback thinking.
+Define only the states your slice uses. Common examples include:
 
-This does not need to be a large production pipeline. It does need to prove that
-you can turn reliability expectations into repeatable automation. Include
-evidence such as workflow YAML, Make or Taskfile targets, CI logs, local dry-run
-output, smoke-test output, or deployment transcripts.
-
-Delivery automation evidence is a hard gate.
-
-## Health model
-
-Use [`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) to define how your
-runtime health model separates process liveness from operational eligibility.
-Process liveness says a runtime can answer. Operational eligibility says it is
-safe for the runtime to do unsafe work.
-
-Define the states your slice exercises. Include only states you can explain
-clearly, but cover the implemented failure scenarios and pause or block behavior.
-Common states include:
-
-- `starting`
 - `healthy`
 - `degraded_dependency`
 - `degraded_data_stale`
-- `blocked_reconciliation_failed`
 - `paused_by_operator`
 - `incident_active`
 - `maintenance_or_rollout`
 
-For each state you use, document:
+For each state, document:
 
-- Entry signals.
+- The signal that enters the state.
 - What the operator sees.
-- Which actions are allowed, paused, or blocked.
-- Which alert, ticket, annotation, or runbook path applies.
-- How the runtime recovers or exits the state.
+- Which actions remain allowed.
+- Which actions are blocked.
+- Which alert, ticket, annotation, or runbook applies.
+- How the runtime exits the state.
 
-A health endpoint returning success is not enough. The model must make unsafe
-unknowns visible and fail closed.
+Use [`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) for examples.
 
-## Observability and alerting
+## Evidence must make behavior reproducible
+
+Evidence should let another engineer inspect what happened and rerun what
+matters.
+
+Useful evidence includes:
+
+- Commands with expected output or captured output.
+- Structured logs with runtime, state, dependency, and timestamp.
+- Metric samples or dashboard screenshots.
+- Workflow runs or local validation transcripts.
+- Failure-trigger commands and recovery commands.
+- Short notes that explain what each artifact proves.
 
 Use [`EVIDENCE_AND_VALIDATION_GUIDE.html`](EVIDENCE_AND_VALIDATION_GUIDE.html)
-to keep evidence concrete. Observability is vendor-neutral for this assignment.
-OpenTelemetry-style concepts, Prometheus-compatible metrics, structured logs,
-plain JSON, dashboards, screenshots, and command output are all acceptable when
-they are clear and repeatable.
+to check evidence quality.
 
-Include enough evidence for another engineer to understand what happened:
+## Failure scenarios must show detection and recovery
 
-- Health commands or endpoints.
-- Metrics or equivalent signals for runtime state, dependency health, data
-  freshness, error rate, restart count, and rollout or configuration status.
-- Structured or searchable logs.
-- Suggested SLIs and SLOs for availability, freshness, recovery, and incident
-  response.
-- At least three alert definitions or documented alert rules with threshold,
-  severity, owner, and action.
-- Evidence from a short run, such as command output, screenshots, log excerpts,
-  dashboard JSON, or metric samples.
+Implement two operational failure scenarios end to end.
 
-We value SRE and DORA-aligned thinking: fast detection, low blast radius,
-recoverability, clear rollback criteria, meaningful alerts, and reliability
-targets that help the team make decisions.
+Good scenario choices include:
 
-## Failure scenarios
-
-Implement two operational failure scenarios end to end. At least one scenario
-must also demonstrate release safety through a bad rollout, bad configuration,
-or controlled promotion failure, unless you document the release-safety scenario
-separately as described above.
-
-Useful scenarios include:
-
-- Runtime crash or restart.
-- Mock dependency outage or timeout.
+- A runtime crash or restart.
+- A mock dependency outage or timeout.
 - Stale data while the runtime process is still alive.
-- Reconciliation failure or mismatched local state.
-- Bad rollout or bad configuration affecting only a subset of runtimes.
+- A reconciliation failure or mismatched local state.
+- A bad rollout or bad configuration affecting only part of the fleet.
 
 For each implemented scenario, show:
 
-- How to trigger it.
-- How the platform detects it.
+- How to trigger the failure.
+- How the system detects the failure.
 - Which runtime or platform state changes.
 - What becomes blocked and what remains allowed.
-- Which alert, ticket, annotation, or incident path fires.
+- Which alert, ticket, annotation, or runbook path applies.
 - How to recover.
 - Which evidence proves the scenario worked.
 
-For scenarios you do not implement, document how you would implement and validate
-them with more time. Be explicit about tradeoffs.
+Document any scenarios you intentionally defer. Explain how you would implement
+and validate them with more time.
 
-## Deployment and rollout thinking
+## Release safety must show blast-radius control
 
-Document how your local slice would grow into operating 20-50 runtimes. Include:
+One of the two implemented failure scenarios must be a bad rollout or bad
+configuration.
 
-- Runtime identity and isolation strategy.
-- Configuration and secret-management assumptions.
-- Rollout rings, canary, or promotion strategy.
-- Rollback criteria and recovery steps.
-- Backup or state-recovery approach where relevant.
-- What Kubernetes, Terraform, Helm, GitOps, or cloud services would add if you
-  chose to use them.
-- Why you did or did not use those tools in the local work sample.
+The release-safety scenario must show validation, promotion or rejection,
+rollback, and blast-radius control. Document any additional release-safety ideas
+as future work.
 
-Kubernetes and Terraform are relevant, but optional. Use them only if they help
-your evidence and do not make review depend on paid infrastructure.
+Kubernetes, Terraform, Helm, and GitOps are optional. Use them only if they make
+the local evidence clearer.
 
-## Security and operator controls
+## The report must separate facts from plans
 
-Document how privileged operations should work. Include:
+Use [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md) for your final report.
+Replace `SUBMISSION.md` with your completed report.
 
-- Authentication and authorization assumptions.
-- Actions that need audit logs.
-- Actions that need confirmation or two-person review.
-- How secrets and external account identifiers would be protected.
-- What should never be allowed directly from a browser or unaudited client.
+Your report must include:
 
-## AI coding tools
-
-AI coding tools are allowed, but you own their output. We will evaluate how you
-supervised, verified, and corrected generated work.
-
-If you use tools such as Codex, Claude Code, Cursor, Copilot, or similar tools,
-include `AI_USAGE.md` with:
-
-- Which tools you used.
-- What you asked them to do.
-- Which generated changes you accepted, edited, or rejected.
-- One example where generated work was wrong or incomplete and how you caught it.
-- The verification you ran yourself.
-
-If you do not use AI tools, state that in your submission report.
-
-## No-agent incident segment
-
-Create `NO_AGENT_INCIDENT.md` without using coding agents or LLMs. You may use
-normal documentation, man pages, shell tools, and your own notes.
-
-Answer this prompt in your own words:
-
-> At 09:37, the operator surface is reachable and API latency is normal, but
-> charts have not updated for 11 minutes for 9 of 50 runtimes. Runtime processes
-> are still running. Operators ask whether they should pause affected runtimes.
-> What do you do in the first 30 minutes?
-
-Include:
-
-- Your first five checks.
-- The severity you would declare and why.
-- What you would block or allow.
-- Who you would page or notify.
-- The operator-facing status message.
-- The first runbook action.
-- What evidence would let you close or downgrade the incident.
-
-## Submission report
-
-Include a concise submission report. You may use
-[`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md). The report must include:
-
-- Architecture overview.
-- Fresh-checkout setup and run commands.
-- Smoke command and output.
-- What you implemented.
-- What you intentionally did not implement.
-- Implemented failure-scenario evidence.
-- Planned remaining scenarios.
+- What you built.
+- How to run it from a fresh checkout.
+- Smoke command and expected output.
+- Health states and blocked actions.
+- Two implemented failure scenarios.
+- Release-safety scenario evidence.
 - Delivery automation evidence.
-- Rollout, rollback, and recovery notes.
-- Security and operator-control notes.
-- AI usage log or a statement that you did not use AI tools.
-- Validation evidence.
-- Follow-up questions you would ask the team.
+- Security and operator-control assumptions.
+- What you intentionally did not build.
+- What you would do next with more time.
+- Links to `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and `DEFENSE_NOTES.md`.
 
-Also create `DEFENSE_NOTES.md` with:
+## The constraints keep the review local and safe
 
-- Three design decisions you expect to defend.
-- One thing you would redesign with more time.
-- One generated mistake you caught, or a statement that you did not use AI tools.
-- One unresolved production risk.
-- The strongest evidence artifact in your submission.
+Follow these constraints:
 
-## Constraints
-
-- Do not connect to real trading, broker, exchange, customer, or secret-bearing
-  systems.
 - Do not include real secrets.
-- Do not require paid infrastructure to review your submission.
-- Do not make the assignment depend on one specific vendor unless you explain
-  why.
-- Do not hide failures behind restarts only. A restart can be part of recovery,
-  but it cannot be the whole health model.
-- Do not spend time making a beautiful UI at the cost of reliability evidence.
-- Do not implement speculative production breadth that your evidence does not
-  exercise.
+- Do not require paid infrastructure.
+- Do not depend on real external accounts.
+- Do not hide failure behind restart-only recovery.
+- Do not make the assignment depend on one vendor unless the reason is clear.
+- Do not add broad production scope that your evidence does not exercise.
+- Do not spend time on visual polish at the cost of operational evidence.
 
-## What we will evaluate
+## AI tool use must be disclosed and verified
 
-This take-home is an asynchronous filter. Passing it means we should spend
-interview time with you; it is not a final hiring decision.
+AI coding tools are allowed, but you own the output.
 
-We will evaluate:
+If you use AI tools, complete `AI_USAGE.md` with:
 
-- Reliability judgment under ambiguity.
-- Fresh-checkout operability.
-- Delivery automation quality.
-- Health-state design and fail-closed behavior.
-- Observability quality and alert actionability.
-- Incident response and runbook clarity.
-- Rollout, recovery, and rollback thinking.
-- Security and operator-control boundaries.
-- How you use or do not use AI coding tools.
-- How clearly you communicate tradeoffs.
+- Tool names.
+- What you asked the tools to do.
+- Generated changes you accepted, edited, or rejected.
+- One generated result that was wrong or incomplete.
+- How you caught the problem.
+- Verification you ran yourself.
 
-Hard gates for proceeding:
+If you do not use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
 
-- Fresh-checkout setup and run commands.
-- Smoke command with expected output.
-- Delivery automation evidence.
-- Clear health model that separates process liveness from operational
-  eligibility.
-- Two implemented operational failure scenarios, including or accompanied by a
-  bad rollout or bad configuration scenario tied to release safety.
-- Documented plans for remaining scenarios.
-- Credible `NO_AGENT_INCIDENT.md`.
-- Assignment constraints respected.
+## The no-agent incident answer must be written by you
 
-Automatic reject examples:
+Complete `NO_AGENT_INCIDENT.md` without coding agents or large language models.
 
-- Treating a basic liveness response as the full health model.
-- No failure injection evidence.
-- Restart-only recovery.
-- Vague alerts without thresholds, severity, owner, or action.
-- Missing `NO_AGENT_INCIDENT.md`.
-- Undisclosed or unverified AI-heavy work.
-- Real external account or secret integrations.
-- Paid infrastructure required for review.
-- Missing fresh-checkout or smoke evidence.
-- Missing delivery automation evidence.
+Use normal documentation, shell tools, man pages, and your own notes. The file
+should show how you reason during the first 30 minutes of an incident.
 
-We will not evaluate:
+## The follow-up interview will test your tradeoffs
 
-- Vendor spend.
-- Pixel-perfect UI design.
-- Algorithm puzzles.
-- Whether you chose our preferred stack.
-- Whether every future production feature is implemented.
+Expect questions about:
 
-## Suggested working plan
-
-Day 1:
-
-- Read the assignment and companion guides.
-- Choose the smallest stack that can prove the operational model.
-- Sketch the architecture, health model, and delivery automation path.
-
-Day 2:
-
-- Build the control surface, simulated runtimes, mock dependency, and pause or
-  block operation.
-- Add health states, logs, metrics, and alerts for the first implemented
-  scenario.
-
-Day 3:
-
-- Add the second implemented failure scenario and the release-safety evidence.
-- Add the smoke command and fresh-checkout validation path.
-
-Day 4-5:
-
-- Write runbooks, rollout notes, security notes, and the no-agent incident
-  segment.
-- Run the delivery automation path and capture evidence.
-
-Day 6-7:
-
-- Tighten documentation, remove accidental scope, rerun smoke checks, and prepare
-  for the follow-up interview.
-
-## Follow-up interview
-
-In the follow-up interview, expect us to ask:
-
-- Why you chose your stack and what you would change in production.
-- How your health model prevents unsafe action when truth is stale.
+- Why you chose your stack.
+- How your health model blocks unsafe work.
 - What your alerts page on and what they deliberately do not page on.
-- How your delivery automation supports validation, promotion, and rollback.
-- How you would operate 20-50 runtimes with a small SRE team.
-- How you used AI tools and how you verified their output.
-- How you handled the no-agent incident prompt.
+- How your delivery path supports validation, promotion, and rollback.
+- How the local slice would grow to 20-50 runtimes.
+- How you used or avoided AI tools.
+- What you would change before production.
 
-Bring your repository, run instructions, delivery evidence, and any screenshots
-or logs needed to show the system working.
+Invite `kmshdev` as a collaborator or reviewer only after the report and
+evidence are ready.

@@ -84,13 +84,23 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Health model guide</p>
-      <h1>Running is not the same as safe.</h1>
+      <h1 id="page-title">Running is not the same as safe.</h1>
       <p>
         A runtime can answer requests and still be unsafe for work. Your health
         model must separate process liveness from operational eligibility.
       </p>
+    </section>
+
+    <section class="section card" aria-labelledby="toc-title">
+      <p class="eyebrow">Table of contents</p>
+      <h2 id="toc-title">Use health states to explain operator decisions.</h2>
+      <ul>
+        <li><a href="#model-title">Show what the operator can trust.</a></li>
+        <li><a href="#states-title">Use only states you can explain with evidence.</a></li>
+        <li><a href="#questions-title">Answer these questions in the submission.</a></li>
+      </ul>
     </section>
 
     <section class="section card" aria-labelledby="model-title">
@@ -103,7 +113,7 @@
         </article>
         <article class="mini">
           <h3>Operational eligibility</h3>
-          <p>The runtime has fresh data, healthy dependencies, and safe rollout state.</p>
+          <p>The runtime has fresh data, trusted dependencies, and safe rollout state.</p>
         </article>
       </div>
     </section>

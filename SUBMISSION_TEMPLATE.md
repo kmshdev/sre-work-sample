@@ -105,8 +105,8 @@ Document:
 
 ## 7. Implemented failure scenarios
 
-Include two end-to-end implemented operational failure scenarios. The release
-safety scenario may be one of them if demonstrated end to end.
+Include two end-to-end implemented operational failure scenarios. One scenario
+must demonstrate release safety through a bad rollout or bad configuration.
 
 For each scenario, include:
 
