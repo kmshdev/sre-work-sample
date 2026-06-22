@@ -16,6 +16,7 @@
     --code: #f1eee7;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   }
+  * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
   main { margin: 0 auto; max-width: 980px; padding: 42px 22px 80px; }
   a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
@@ -29,7 +30,7 @@
     font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   }
   code { padding: 1px 5px; }
-  pre { overflow-x: auto; padding: 14px; }
+  pre { max-width: 100%; overflow-x: auto; padding: 14px; }
   .back { margin-bottom: 26px; }
   .progress {
     background: var(--panel);
@@ -64,6 +65,7 @@
     justify-content: center;
     width: 34px;
   }
+  .item > div { min-width: 0; }
   .evidence { color: var(--text); font-weight: 650; }
   @media (prefers-color-scheme: dark) {
     :root {
