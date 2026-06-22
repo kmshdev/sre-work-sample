@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Model Guide - 2026 SRE Take-Home</title>
+<script>
+  (function () {
+    var stored = localStorage.getItem("theme");
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (stored === "dark" || (!stored && prefersDark)) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+<style>
+  :root {
+    --ivory: #faf9f5;
+    --slate: #141413;
+    --clay: #d97757;
+    --oat: #e3dacc;
+    --olive: #788c5d;
+    --rust: #b04a3f;
+    --gray-100: #f0eee6;
+    --gray-300: #d1cfc5;
+    --gray-500: #87867f;
+    --gray-700: #3d3d3a;
+    --panel: #ffffff;
+    --shadow: rgba(20, 20, 19, 0.06);
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --border: 1.5px solid var(--gray-300);
+  }
+  html.dark {
+    --ivory: #171715;
+    --slate: #faf9f5;
+    --clay: #e58a69;
+    --oat: #4a4338;
+    --olive: #9aae78;
+    --rust: #dc6b61;
+    --gray-100: #24231f;
+    --gray-300: #45433b;
+    --gray-500: #aaa69a;
+    --gray-700: #d8d3c6;
+    --panel: #20201d;
+    --shadow: rgba(0, 0, 0, 0.28);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 56px 24px 110px;
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 44px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  nav { position: sticky; top: 28px; align-self: start; font-size: 13px; }
+  nav .label, .eyebrow, .k {
+    color: var(--gray-500);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  nav .label { margin-bottom: 12px; }
+  nav a {
+    display: block;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--gray-300);
+    color: var(--gray-700);
+    text-decoration: none;
+  }
+  nav a:hover { color: var(--slate); border-color: var(--clay); }
+  .topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .theme-toggle {
+    appearance: none;
+    border: var(--border);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--slate);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 7px 11px;
+  }
+  h1, h2, h3 {
+    color: var(--slate);
+    font-family: var(--serif);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  h1 { font-size: 40px; line-height: 1.12; margin: 0 0 16px; max-width: 820px; }
+  h2 { font-size: 25px; margin: 0 0 8px; }
+  h3 { font-size: 19px; margin: 0 0 8px; }
+  p { margin: 0 0 13px; max-width: 760px; }
+  header, section { margin-bottom: 52px; scroll-margin-top: 24px; }
+  .lede { font-size: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .card, .callout, table {
+    background: var(--panel);
+    border: var(--border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--shadow);
+  }
+  .card, .callout { padding: 20px 22px; }
+  .callout { border-left: 4px solid var(--clay); }
+  table { border-collapse: separate; border-spacing: 0; overflow: hidden; width: 100%; }
+  th {
+    background: var(--gray-100);
+    border-bottom: 1px solid var(--gray-300);
+    color: var(--gray-500);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 12px 14px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+  td { border-bottom: 1px solid var(--gray-100); padding: 13px 14px; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { margin: 0 0 10px; padding-left: 24px; position: relative; }
+  li::before {
+    background: var(--clay);
+    border-radius: 2px;
+    content: "";
+    height: 7px;
+    left: 4px;
+    position: absolute;
+    top: 9px;
+    width: 7px;
+  }
+  code {
+    background: var(--gray-100);
+    border-radius: 4px;
+    color: var(--slate);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 1px 5px;
+  }
+  a { color: var(--clay); text-decoration: none; border-bottom: 1px dotted var(--clay); }
+  footer {
+    border-top: 1px solid var(--gray-300);
+    color: var(--gray-500);
+    font-size: 13px;
+    margin-top: 54px;
+    padding-top: 18px;
+  }
+  @media (max-width: 900px) {
+    body { padding: 36px 18px 80px; }
+    .page { display: block; }
+    nav { display: none; }
+    h1 { font-size: 34px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav aria-label="Guide sections">
+    <div class="label">Health guide</div>
+    <a href="#idea">Core idea</a>
+    <a href="#table">State table</a>
+    <a href="#questions">Design questions</a>
+    <a href="#pitfalls">Pitfalls</a>
+  </nav>
+
+  <main>
+    <header id="idea">
+      <div class="topline">
+        <div class="eyebrow">Health Model Guide</div>
+        <button class="theme-toggle" type="button" id="themeToggle">Toggle theme</button>
+      </div>
+      <h1>Health is not just whether the process is running</h1>
+      <p class="lede">
+        Your model should explain what the runtime knows, what it does not know, what the
+        operator sees, and which actions are allowed when truth is stale or incomplete.
+        Implement evidence for the states your local slice exercises; document other states
+        only as planned follow-up work.
+      </p>
+    </header>
+
+    <section>
+      <div class="grid">
+        <div class="card">
+          <h3>Process health</h3>
+          <p>
+            Is the service alive, serving requests, and within basic resource limits?
+            This is necessary, but it is not enough for a critical runtime.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Operational eligibility</h3>
+          <p>
+            Is the runtime allowed to perform unsafe work right now? This depends on data
+            freshness, dependency state, reconciliation, operator pauses, and rollout state.
+          </p>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>Strong signal:</strong> your implementation can be alive but not eligible
+        for unsafe actions, and that distinction is visible to operators for the states
+        exercised by your slice.
+      </div>
+    </section>
+
+    <section id="table">
+      <h2>What the state table should answer</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Question to answer</th>
+            <th>Do not turn this into</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Entry signals</td>
+            <td>What concrete observation moves the runtime into this state?</td>
+            <td>A vague label such as "bad dependency" without a measurable signal.</td>
+          </tr>
+          <tr>
+            <td>Operator view</td>
+            <td>What status, timestamp, and affected runtime identity should be visible?</td>
+            <td>A hidden log-only condition that operators cannot see.</td>
+          </tr>
+          <tr>
+            <td>Unsafe actions</td>
+            <td>Can new risky work proceed, or should it be blocked?</td>
+            <td>A process-health answer that ignores stale or unknown truth.</td>
+          </tr>
+          <tr>
+            <td>Safe actions</td>
+            <td>Can operators pause, inspect, recover, or perform safe management actions?</td>
+            <td>A full stop that blocks recovery operations without explanation.</td>
+          </tr>
+          <tr>
+            <td>Alert route</td>
+            <td>Does this page immediately, create a ticket, or only annotate the UI?</td>
+            <td>Paging for every state transition, or paging for none of them.</td>
+          </tr>
+          <tr>
+            <td>Runbook</td>
+            <td>What is the first action and what evidence closes the issue?</td>
+            <td>"Restart it" as the whole recovery plan.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="questions">
+      <h2>Design questions to answer in your own system</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Stale data</h3>
+          <ul>
+            <li>How old can data be before a runtime is degraded or blocked?</li>
+            <li>How do you prove the process is alive but not receiving fresh data?</li>
+            <li>What changes in the operator view when only a subset is affected?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Dependency failure</h3>
+          <ul>
+            <li>Which dependency failures are page-worthy versus ticket-worthy?</li>
+            <li>What actions remain safe while the dependency is disconnected?</li>
+            <li>What evidence proves recovery is complete?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Reconciliation</h3>
+          <ul>
+            <li>How do you detect state mismatch after restart or dependency recovery?</li>
+            <li>What is blocked until reconciliation passes?</li>
+            <li>Who can override a blocked state, if anyone?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Operator pause</h3>
+          <ul>
+            <li>How is a pause different from a crash or incident?</li>
+            <li>What is audited when pause or resume is triggered?</li>
+            <li>What should happen after a bad rollout is paused?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="pitfalls">
+      <h2>Common pitfalls</h2>
+      <div class="card">
+        <ul>
+          <li>Equating container liveness with a healthy runtime.</li>
+          <li>Defining states that do not change any operator behavior.</li>
+          <li>Leaving alert severity out of the model.</li>
+          <li>Auto-resuming unsafe work after restart without evidence.</li>
+          <li>Documenting a state that the implementation cannot display or test.</li>
+          <li>Mixing implemented health-state evidence with planned states without labels.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Guardrail guide for the health-model section. It is not a completed answer key.
+    </footer>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var button = document.getElementById("themeToggle");
+    function updateLabel() {
+      button.textContent = document.documentElement.classList.contains("dark")
+        ? "Light mode"
+        : "Dark mode";
+    }
+    button.addEventListener("click", function () {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem(
+        "theme",
+        document.documentElement.classList.contains("dark") ? "dark" : "light"
+      );
+      updateLabel();
+    });
+    updateLabel();
+  })();
+</script>
+</body>
+</html>
