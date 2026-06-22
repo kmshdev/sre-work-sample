@@ -6,226 +6,255 @@
 <title>SRE Take-Home: Market Data Freshness</title>
 <style>
   :root {
-    color-scheme: dark;
-    --bg: #101214;
-    --panel: #171a1d;
-    --panel-2: #1f2327;
-    --line: #30363d;
-    --text: #f4f0e8;
-    --muted: #b9b2a6;
-    --accent: #8dd3c7;
-    --warn: #f2bf6d;
-    --danger: #ff8f80;
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: light dark;
+    --bg: #fbfbfa;
+    --text: #18181b;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --panel: #ffffff;
+    --soft: #f4f4f5;
+    --emerald: #047857;
+    --indigo: #4f46e5;
+    --amber: #b45309;
+    --rose: #be123c;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
-  main { margin: 0 auto; max-width: 1120px; padding: 42px 22px 80px; }
-  a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  code {
-    background: #23282c;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    color: var(--text);
-    padding: 1px 5px;
-  }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55; }
+  main { min-height: 100svh; padding: 48px 40px; }
+  .wrap { margin: 0 auto; max-width: 768px; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
   .eyebrow {
-    color: var(--accent);
-    font-size: 13px;
-    letter-spacing: .08em;
+    color: var(--muted);
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .3em;
     text-transform: uppercase;
   }
-  h1 { font-size: clamp(2.4rem, 7vw, 5.2rem); line-height: .96; margin: 12px 0; }
-  h2 { margin: 0 0 12px; }
-  h3 { margin: 0 0 8px; }
-  p, li { color: var(--muted); }
-  header {
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 30px;
-    padding-bottom: 28px;
-  }
-  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-  .links a {
-    background: var(--panel);
-    border: 1px solid var(--line);
+  h1 { font-size: 34px; letter-spacing: -.03em; line-height: 1.1; margin: 8px 0 0; }
+  h2 { font-size: 20px; letter-spacing: -.02em; margin: 0; }
+  a { color: inherit; text-decoration-color: color-mix(in srgb, var(--text) 35%, transparent); }
+  a { text-underline-offset: 4px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; }
+  .subscribe {
+    align-items: center;
+    background: color-mix(in srgb, var(--panel) 70%, transparent);
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
     border-radius: 6px;
-    padding: 10px 12px;
+    color: var(--muted);
+    display: inline-flex;
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    gap: 8px;
+    letter-spacing: .25em;
+    padding: 9px 12px;
     text-decoration: none;
+    text-transform: uppercase;
   }
-  .summary {
+  .timeline { display: flex; flex-direction: column; margin-top: 40px; }
+  .release {
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
     display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(3, 1fr);
-    margin: 28px 0 42px;
+    gap: 32px;
+    grid-template-columns: 140px 1fr;
+    padding: 40px 0;
   }
-  .card, .group {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 18px;
+  .release:last-child { border-bottom: 0; }
+  .rail { align-self: start; position: sticky; top: 32px; }
+  .date {
+    align-items: center;
+    color: var(--muted);
+    display: flex;
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    gap: 8px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
   }
-  .timeline { display: grid; gap: 16px; }
-  .group { border-left: 4px solid var(--accent); }
-  .group.warning { border-left-color: var(--warn); }
-  .group.danger { border-left-color: var(--danger); }
-  .entry {
-    border-top: 1px solid var(--line);
+  .version { align-items: center; display: flex; gap: 8px; margin-top: 8px; }
+  .version strong { font-size: 20px; letter-spacing: -.02em; }
+  .latest {
+    align-items: center;
+    background: var(--text);
+    border-radius: 999px;
+    color: var(--bg);
+    display: inline-flex;
+    font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    gap: 4px;
+    letter-spacing: .2em;
+    padding: 5px 8px;
+    text-transform: uppercase;
+  }
+  .hero-card {
+    aspect-ratio: 16 / 7;
+    background:
+      radial-gradient(circle at 25% 20%, color-mix(in srgb, var(--indigo) 16%, transparent), transparent 34%),
+      linear-gradient(135deg, color-mix(in srgb, var(--indigo) 10%, transparent), transparent 45%),
+      linear-gradient(315deg, color-mix(in srgb, var(--emerald) 12%, transparent), transparent 42%);
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 12px;
     display: grid;
-    gap: 10px;
-    grid-template-columns: 150px 1fr;
-    padding: 14px 0 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+    place-items: center;
+    text-align: center;
   }
-  .entry + .entry { margin-top: 12px; }
-  .label {
-    color: var(--text);
-    font-weight: 700;
+  .hero-card strong { display: block; font-size: 18px; letter-spacing: -.02em; margin-top: 8px; }
+  .group { margin-top: 20px; }
+  .group:first-child { margin-top: 0; }
+  .tag {
+    border-radius: 4px;
+    display: inline-flex;
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .2em;
+    padding: 5px 7px;
+    text-transform: uppercase;
   }
-  .command {
-    background: #070809;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    color: var(--warn);
-    overflow-x: auto;
-    padding: 14px;
+  .emerald { background: color-mix(in srgb, var(--emerald) 12%, transparent); color: var(--emerald); }
+  .indigo { background: color-mix(in srgb, var(--indigo) 12%, transparent); color: var(--indigo); }
+  .amber { background: color-mix(in srgb, var(--amber) 12%, transparent); color: var(--amber); }
+  .rose { background: color-mix(in srgb, var(--rose) 12%, transparent); color: var(--rose); }
+  ul { list-style: none; margin: 8px 0 0; padding: 0; }
+  li { color: color-mix(in srgb, var(--text) 85%, transparent); display: flex; font-size: 14px; gap: 8px; }
+  li + li { margin-top: 6px; }
+  li::before {
+    background: color-mix(in srgb, var(--muted) 60%, transparent);
+    border-radius: 50%;
+    content: "";
+    flex: 0 0 auto;
+    height: 4px;
+    margin-top: 10px;
+    width: 4px;
   }
-  @media (max-width: 820px) {
-    .summary { grid-template-columns: 1fr; }
-    .entry { grid-template-columns: 1fr; }
+  code {
+    background: var(--soft);
+    border-radius: 4px;
+    font: 600 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 1px 5px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #09090b;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --line: #27272a;
+      --panel: #09090b;
+      --soft: #18181b;
+      --emerald: #34d399;
+      --indigo: #818cf8;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+    }
+  }
+  @media (max-width: 720px) {
+    main { padding: 32px 18px; }
+    header { align-items: flex-start; flex-direction: column; }
+    .release { grid-template-columns: 1fr; gap: 18px; padding: 34px 0; }
+    .rail { position: static; }
   }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <div class="eyebrow">Senior SRE work sample</div>
-    <h1>Market Data Freshness</h1>
-    <p>
-      This browser guide maps the assignment. The root README is authoritative:
-      use it when instructions differ.
-    </p>
-    <nav class="links" aria-label="Candidate guidance">
-      <a href="../README.md">README</a>
-      <a href="CANDIDATE_RUNBOOK.html">Runbook</a>
-      <a href="HEALTH_MODEL_GUIDE.html">Health model</a>
-      <a href="EVIDENCE_AND_VALIDATION_GUIDE.html">Evidence guide</a>
-      <a href="../SUBMISSION_TEMPLATE.md">Submission template</a>
-    </nav>
-  </header>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="eyebrow">Assignment guide</div>
+        <h1>Market Data Freshness</h1>
+      </div>
+      <a class="subscribe" href="../README.md">README</a>
+    </header>
 
-  <section class="summary" aria-label="Assignment summary">
-    <article class="card">
-      <h2>Window</h2>
-      <p>6 calendar days. Expect 6-8 focused hours.</p>
-    </article>
-    <article class="card">
-      <h2>System</h2>
-      <p>Three fictional feeds: <code>alpha</code>, <code>bravo</code>, and <code>charlie</code>.</p>
-    </article>
-    <article class="card">
-      <h2>Signal</h2>
-      <p>Operational judgment under stale data and partial failure.</p>
-    </article>
-  </section>
-
-  <section class="timeline" aria-label="Assignment guidance timeline">
-    <article class="group">
-      <h2>Start Here</h2>
-      <div class="entry">
-        <div class="label">Run the baseline</div>
+    <section class="timeline" aria-label="Assignment guidance timeline">
+      <article class="release">
+        <aside class="rail">
+          <div class="date">Day 0</div>
+          <div class="version">
+            <strong>Start</strong>
+            <span class="latest">Latest</span>
+          </div>
+        </aside>
         <div>
-          <p>Run the starter before changing anything.</p>
-          <pre class="command"><code>make setup
-make test
-make smoke</code></pre>
+          <div class="hero-card">
+            <div>
+              <span aria-hidden="true">*</span>
+              <strong>Run the starter before changing it.</strong>
+            </div>
+          </div>
+          <div class="group">
+            <span class="tag emerald">Start Here</span>
+            <ul>
+              <li>Run <code>make setup</code>, <code>make test</code>, and <code>make smoke</code>.</li>
+              <li>Use <a href="../README.md">README.md</a> as the authoritative spec.</li>
+              <li>Use this browser guide as the map for candidate-facing guidance.</li>
+            </ul>
+          </div>
         </div>
-      </div>
-      <div class="entry">
-        <div class="label">Use the map</div>
-        <p>Use this page to navigate. Use <a href="../README.md">README.md</a> as the spec.</p>
-      </div>
-    </article>
+      </article>
 
-    <article class="group">
-      <h2>Build</h2>
-      <div class="entry">
-        <div class="label">Eligibility</div>
-        <p>Separate liveness from safe-to-serve eligibility.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Freshness</div>
-        <p>Detect stale or unknown feed data, then fail closed for unsafe actions.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Partial failure</div>
-        <p>Keep unaffected feeds eligible when only one feed is stale.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Guide</div>
-        <p>Use <a href="HEALTH_MODEL_GUIDE.html">the health model guide</a>.</p>
-      </div>
-    </article>
+      <article class="release">
+        <aside class="rail">
+          <div class="date">Build</div>
+          <div class="version"><strong>Model</strong></div>
+        </aside>
+        <div>
+          <div class="group">
+            <span class="tag indigo">Build</span>
+            <ul>
+              <li>Separate process liveness from safe-to-serve eligibility.</li>
+              <li>
+                Detect stale or unknown feed data for <code>alpha</code>,
+                <code>bravo</code>, and <code>charlie</code>.
+              </li>
+              <li>Fail closed for unsafe downstream work while fresh unaffected feeds remain eligible.</li>
+              <li>Use <a href="HEALTH_MODEL_GUIDE.html">the health model guide</a>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
 
-    <article class="group">
-      <h2>Prove</h2>
-      <div class="entry">
-        <div class="label">States</div>
-        <p>Show healthy, stale, and recovered states with rerunnable commands.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Delivery</div>
-        <p>Use GitHub Actions as the delivery gate for tests, smoke, and docs validation.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Notes</div>
-        <p>Complete incident, AI usage, and defense notes before review.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Guide</div>
-        <p>Use <a href="EVIDENCE_AND_VALIDATION_GUIDE.html">the evidence guide</a>.</p>
-      </div>
-    </article>
+      <article class="release">
+        <aside class="rail">
+          <div class="date">Evidence</div>
+          <div class="version"><strong>Prove</strong></div>
+        </aside>
+        <div>
+          <div class="group">
+            <span class="tag amber">Prove</span>
+            <ul>
+              <li>Show healthy, stale, and recovered states with rerunnable commands.</li>
+              <li>Use GitHub Actions as the delivery gate for setup, tests, smoke, and docs validation.</li>
+              <li>Complete incident, AI usage, and defense notes before review.</li>
+              <li>Use <a href="EVIDENCE_AND_VALIDATION_GUIDE.html">the evidence guide</a>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
 
-    <article class="group warning">
-      <h2>Do Not Overbuild</h2>
-      <div class="entry">
-        <div class="label">No real systems</div>
-        <p>No real accounts, secrets, paid services, or trading systems.</p>
-      </div>
-      <div class="entry">
-        <div class="label">No infra tax</div>
-        <p>Do not require Kubernetes, Terraform, DNS, BGP, or cloud deployment.</p>
-      </div>
-      <div class="entry">
-        <div class="label">No polish trap</div>
-        <p>Do not substitute dashboard polish for operational evidence.</p>
-      </div>
-    </article>
-
-    <article class="group danger">
-      <h2>Review Gates</h2>
-      <div class="entry">
-        <div class="label">Fresh checkout</div>
-        <p>Setup works.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Tests</div>
-        <p><code>make test</code> passes.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Smoke</div>
-        <p><code>make smoke</code> proves healthy, stale, and recovered states.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Docs</div>
-        <p><code>make docs-check</code> passes.</p>
-      </div>
-      <div class="entry">
-        <div class="label">Incident</div>
-        <p>The stale <code>bravo</code> incident note is complete.</p>
-      </div>
-    </article>
-  </section>
+      <article class="release">
+        <aside class="rail">
+          <div class="date">Scope</div>
+          <div class="version"><strong>Guardrails</strong></div>
+        </aside>
+        <div>
+          <div class="group">
+            <span class="tag rose">Do Not Overbuild</span>
+            <ul>
+              <li>No real accounts, secrets, paid services, trading systems, or cloud deployment.</li>
+              <li>Do not make Kubernetes, Terraform, DNS, or BGP required.</li>
+              <li>Do not substitute dashboard polish for operational evidence.</li>
+            </ul>
+          </div>
+          <div class="group">
+            <span class="tag emerald">Review Gates</span>
+            <ul>
+              <li>Fresh checkout works; tests pass; smoke proves healthy, stale, and recovered states.</li>
+              <li><code>make docs-check</code> passes.</li>
+              <li>The stale <code>bravo</code> incident note is complete.</li>
+              <li><a href="CANDIDATE_RUNBOOK.html">Open the onboarding checklist</a>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
 </main>
 </body>
 </html>

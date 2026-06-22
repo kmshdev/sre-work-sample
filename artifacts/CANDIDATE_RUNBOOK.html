@@ -7,163 +7,329 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #faf9f5;
-    --text: #181a1d;
-    --muted: #61666c;
-    --panel: #ffffff;
-    --line: #d9d6ce;
-    --accent: #287f71;
-    --code: #f1eee7;
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bg: #ffffff;
+    --text: #18181b;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --soft: #f4f4f5;
+    --card: #ffffff;
+    --green: #059669;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
-  main { margin: 0 auto; max-width: 980px; padding: 42px 22px 80px; }
-  a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; margin-bottom: 10px; }
-  h2 { margin-top: 34px; }
-  p, li { color: var(--muted); }
-  code, pre {
-    background: var(--code);
-    border-radius: 6px;
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  }
-  code { padding: 1px 5px; }
-  pre { max-width: 100%; overflow-x: auto; padding: 14px; }
-  .back { margin-bottom: 26px; }
-  .progress {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    margin: 26px 0;
+  body { margin: 0; min-height: 100svh; background: var(--bg); color: var(--text); }
+  a { color: inherit; text-decoration-color: color-mix(in srgb, var(--text) 35%, transparent); }
+  a { text-underline-offset: 4px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+  .app { min-height: 100svh; overflow: hidden; position: relative; }
+  .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100svh; }
+  .sidebar {
+    background: color-mix(in srgb, var(--text) 2%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
     padding: 18px;
   }
-  .bar { background: var(--line); border-radius: 999px; height: 10px; overflow: hidden; }
-  .bar span { background: var(--accent); display: block; height: 100%; width: 0; }
-  .checklist { counter-reset: step; display: grid; gap: 14px; padding: 0; }
-  .item {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    display: grid;
-    gap: 14px;
-    grid-template-columns: 48px 1fr;
-    list-style: none;
-    padding: 18px;
+  .skeleton { background: color-mix(in srgb, var(--text) 10%, transparent); border-radius: 999px; height: 8px; }
+  .skeleton.logo { height: 12px; width: 112px; }
+  .skeleton + .skeleton { margin-top: 9px; }
+  .work { padding: 40px; }
+  .eyebrow {
+    color: var(--muted);
+    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .3em;
+    text-transform: uppercase;
   }
-  .item::before {
+  h1 { font-size: 32px; letter-spacing: -.03em; line-height: 1.1; margin: 8px 0 0; }
+  .lede { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 460px; }
+  .tiles { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 32px; }
+  .tile {
+    background: color-mix(in srgb, var(--text) 2%, transparent);
+    border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+    border-radius: 12px;
+    min-height: 128px;
+  }
+  .panel {
+    background: var(--card);
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 12px;
+    bottom: 24px;
+    box-shadow: 0 24px 60px rgb(0 0 0 / .18);
+    max-width: calc(100vw - 32px);
+    position: absolute;
+    right: 24px;
+    width: 440px;
+    z-index: 5;
+  }
+  .panel-toggle {
     align-items: center;
-    background: var(--code);
-    border-radius: 50%;
-    color: var(--accent);
-    content: counter(step);
-    counter-increment: step;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
     display: flex;
-    font-weight: 700;
-    height: 34px;
-    justify-content: center;
-    width: 34px;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-align: left;
+    width: 100%;
   }
-  .item > div { min-width: 0; }
-  .evidence { color: var(--text); font-weight: 650; }
+  .panel-title { font-size: 14px; font-weight: 650; }
+  .panel-sub {
+    color: var(--muted);
+    font: 700 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .25em;
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+  .progress { display: flex; align-items: center; gap: 12px; }
+  .ring { display: grid; height: 36px; place-items: center; position: relative; width: 36px; }
+  .ring svg { height: 36px; position: absolute; rotate: -90deg; width: 36px; }
+  .ring span { font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .chevron { color: var(--muted); font-size: 16px; }
+  .steps {
+    border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .steps[hidden] { display: none; }
+  .step { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+  .step:first-child { border-top: 0; }
+  .step-row {
+    align-items: flex-start;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    display: flex;
+    gap: 12px;
+    padding: 13px 16px;
+    text-align: left;
+    width: 100%;
+  }
+  .mark {
+    align-items: center;
+    border: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+    border-radius: 999px;
+    color: transparent;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 24px;
+    justify-content: center;
+    margin-top: 2px;
+    width: 24px;
+  }
+  .done .mark {
+    background: color-mix(in srgb, var(--green) 15%, transparent);
+    border-color: transparent;
+    color: var(--green);
+  }
+  .step-text { flex: 1; min-width: 0; }
+  .step-title { display: block; font-size: 14px; font-weight: 650; }
+  .done .step-title { color: var(--muted); text-decoration: line-through; }
+  .step-desc {
+    color: var(--muted);
+    display: block;
+    font-size: 12px;
+    line-height: 1.35;
+    margin: 3px 0 0;
+  }
+  .icon { color: color-mix(in srgb, var(--muted) 70%, transparent); flex: 0 0 auto; font-size: 15px; }
+  code {
+    background: var(--soft);
+    border-radius: 4px;
+    font: 600 11px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 1px 4px;
+  }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #101214;
-      --text: #f4f0e8;
-      --muted: #b9b2a6;
-      --panel: #171a1d;
-      --line: #30363d;
-      --accent: #8dd3c7;
-      --code: #23282c;
+      --bg: #09090b;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --line: #27272a;
+      --soft: #18181b;
+      --card: #09090b;
+      --green: #34d399;
     }
   }
-  @media (max-width: 700px) {
-    .item { grid-template-columns: 1fr; }
+  @media (max-width: 760px) {
+    .shell { display: block; }
+    .sidebar { display: none; }
+    .work { padding: 28px 18px 520px; }
+    .tiles { grid-template-columns: 1fr; }
+    .panel { bottom: 16px; left: 16px; right: 16px; width: auto; }
   }
 </style>
 </head>
 <body>
-<main>
-  <p class="back"><a href="index.html">Back to overview</a></p>
-  <h1>Use the checklist to pace the work</h1>
-  <p>
-    This checklist is static on purpose. Capture evidence in your repository;
-    do not rely on browser state.
-  </p>
+<main class="app">
+  <div class="shell" aria-hidden="true">
+    <aside class="sidebar">
+      <div class="skeleton logo"></div>
+      <div class="skeleton" style="width: 132px; margin-top: 18px;"></div>
+      <div class="skeleton" style="width: 112px;"></div>
+      <div class="skeleton" style="width: 120px;"></div>
+    </aside>
+    <section class="work">
+      <p><a href="index.html">Back to overview</a></p>
+      <div class="eyebrow">Welcome</div>
+      <h1>First steps</h1>
+      <p class="lede">
+        Your onboarding checklist sits in the bottom right. Tick it off as you
+        collect evidence for the Market Data Freshness assignment.
+      </p>
+      <div class="tiles">
+        <div class="tile"></div>
+        <div class="tile"></div>
+        <div class="tile"></div>
+        <div class="tile"></div>
+      </div>
+    </section>
+  </div>
 
-  <section class="progress" aria-label="Checklist progress">
-    <h2>Start at 0 of 8 complete</h2>
-    <p>Mark progress in your own notes or submission. The page does not store state.</p>
-    <div class="bar" aria-hidden="true"><span></span></div>
+  <section class="panel" aria-label="Onboarding checklist">
+    <button class="panel-toggle" type="button" aria-controls="checklist" aria-expanded="true">
+      <span>
+        <span class="panel-title">Get set up</span>
+        <span class="panel-sub">2 of 8 complete</span>
+      </span>
+      <span class="progress">
+        <span class="ring" aria-label="25 percent complete">
+          <svg viewBox="0 0 36 36" aria-hidden="true">
+            <circle
+              cx="18"
+              cy="18"
+              r="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-opacity=".12"
+              stroke-width="3"
+            ></circle>
+            <circle
+              cx="18"
+              cy="18"
+              r="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-dasharray="22 88"
+            ></circle>
+          </svg>
+          <span>25%</span>
+        </span>
+        <span class="chevron" aria-hidden="true">v</span>
+      </span>
+    </button>
+
+    <ol id="checklist" class="steps">
+      <li class="step done">
+        <button class="step-row" type="button">
+          <span class="mark">OK</span>
+          <span class="step-text">
+            <span class="step-title">Clone and install</span>
+            <span class="step-desc">Run <code>make setup</code>. Evidence: setup transcript or no-error output.</span>
+          </span>
+          <span class="icon">[]</span>
+        </button>
+      </li>
+      <li class="step done">
+        <button class="step-row" type="button">
+          <span class="mark">OK</span>
+          <span class="step-text">
+            <span class="step-title">Run the baseline</span>
+            <span class="step-desc">Run <code>make test</code> and <code>make smoke</code>. Evidence: smoke JSON.</span>
+          </span>
+          <span class="icon">!!</span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Trigger stale bravo</span>
+            <span class="step-desc">
+              Run the stale scenario. Evidence: <code>bravo</code> appears in
+              <code>unsafe_feeds</code>.
+            </span>
+          </span>
+          <span class="icon">()</span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Recover bravo</span>
+            <span class="step-desc">
+              Run recovery. Evidence: <code>overall_status</code> returns to
+              <code>eligible</code>.
+            </span>
+          </span>
+          <span class="icon">-></span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Document the health model</span>
+            <span class="step-desc">
+              Fill <code>docs/ARCHITECTURE.md</code> with liveness, freshness,
+              and eligibility.
+            </span>
+          </span>
+          <span class="icon">##</span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Write operations evidence</span>
+            <span class="step-desc">
+              Fill <code>docs/OPERATIONS.md</code> and capture trigger, block,
+              and recovery proof.
+            </span>
+          </span>
+          <span class="icon">&lt;&gt;</span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Complete submission files</span>
+            <span class="step-desc">
+              Fill <code>SUBMISSION.md</code>, <code>INCIDENT_NOTE.md</code>,
+              and AI/defense notes.
+            </span>
+          </span>
+          <span class="icon">[]</span>
+        </button>
+      </li>
+      <li class="step">
+        <button class="step-row" type="button">
+          <span class="mark">--</span>
+          <span class="step-text">
+            <span class="step-title">Run final validation</span>
+            <span class="step-desc">
+              Run <code>make test</code>, <code>make smoke</code>, and
+              <code>make docs-check</code>.
+            </span>
+          </span>
+          <span class="icon">OK</span>
+        </button>
+      </li>
+    </ol>
   </section>
-
-  <ol class="checklist">
-    <li class="item">
-      <div>
-        <h2>Clone and install</h2>
-        <p>Run <code>make setup</code>.</p>
-        <p class="evidence">Evidence: setup transcript or no-error command output.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Run the baseline</h2>
-        <p>Run <code>make test</code> and <code>make smoke</code>.</p>
-        <p class="evidence">Evidence: passing tests and smoke JSON.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Trigger stale bravo</h2>
-        <pre><code>.venv/bin/python -m sre_work_sample.cli scenario stale \
-  --feed bravo \
-  --output /tmp/bravo-stale.json</code></pre>
-        <p class="evidence">Evidence: <code>bravo</code> appears in <code>unsafe_feeds</code>.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Recover bravo</h2>
-        <pre><code>.venv/bin/python -m sre_work_sample.cli recover \
-  --feed bravo \
-  --state /tmp/bravo-stale.json \
-  --output /tmp/bravo-recovered.json</code></pre>
-        <p class="evidence">Evidence: <code>overall_status</code> returns to <code>eligible</code>.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Document the health model</h2>
-        <p>Fill <code>docs/ARCHITECTURE.md</code>.</p>
-        <p class="evidence">Evidence: liveness, freshness, eligibility, and blocked actions.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Write operations evidence</h2>
-        <p>Fill <code>docs/OPERATIONS.md</code> and capture transcripts under <code>evidence/</code>.</p>
-        <p class="evidence">Evidence: trigger, detection, blocked action, and recovery.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Complete submission files</h2>
-        <p>
-          Fill <code>SUBMISSION.md</code>, <code>INCIDENT_NOTE.md</code>,
-          <code>AI_USAGE.md</code>, and <code>DEFENSE_NOTES.md</code>.
-        </p>
-        <p class="evidence">Evidence: all required links and notes are present.</p>
-      </div>
-    </li>
-    <li class="item">
-      <div>
-        <h2>Run final validation</h2>
-        <p>Run <code>make test</code>, <code>make smoke</code>, and <code>make docs-check</code>.</p>
-        <p class="evidence">Evidence: all pass before inviting <code>kmshdev</code>.</p>
-      </div>
-    </li>
-  </ol>
 </main>
+<script>
+  const toggle = document.querySelector(".panel-toggle");
+  const checklist = document.querySelector("#checklist");
+  toggle.addEventListener("click", () => {
+    const open = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!open));
+    checklist.hidden = open;
+    toggle.querySelector(".chevron").textContent = open ? "^" : "v";
+  });
+</script>
 </body>
 </html>
