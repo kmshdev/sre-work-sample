@@ -28,15 +28,25 @@
       --sky: #78c7f0;
       --blue: #85a7ff;
       --ring: #d8b46a;
+      --radius-panel: 18px;
+      --radius-inner: 12px;
       --shadow:
         0 0 0 1px rgba(255, 255, 255, .08),
         0 16px 44px rgba(0, 0, 0, .36);
-      font-family:
+      --font-ui:
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      --font-mono:
         "IBM Plex Mono",
         "SFMono-Regular",
         Consolas,
         "Liberation Mono",
         monospace;
+      font-family: var(--font-ui);
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -83,13 +93,14 @@
 
     code {
       color: var(--text);
-      font: inherit;
+      font-family: var(--font-mono);
+      font-size: .95em;
     }
 
     .shell {
       width: min(1220px, calc(100vw - 32px));
       margin: 0 auto;
-      padding: 28px 0 44px;
+      padding: 32px 0 48px;
     }
 
     .topbar {
@@ -112,6 +123,7 @@
     button,
     input,
     .status-line {
+      font-family: var(--font-mono);
       font-size: .78rem;
       line-height: 1.2;
     }
@@ -122,6 +134,7 @@
       gap: 8px;
       color: var(--muted);
       text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
     }
 
     .crumbs strong {
@@ -145,7 +158,7 @@
       justify-content: center;
       gap: 8px;
       border: 0;
-      border-radius: 10px;
+      border-radius: var(--radius-inner);
       background: var(--panel);
       color: var(--text);
       box-shadow: 0 0 0 1px var(--line);
@@ -173,13 +186,13 @@
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 18px;
+      gap: 20px;
       align-items: stretch;
     }
 
     .panel {
       min-width: 0;
-      border-radius: 18px;
+      border-radius: var(--radius-panel);
       background:
         linear-gradient(180deg, rgba(255, 255, 255, .026), transparent 34%),
         var(--panel);
@@ -205,22 +218,22 @@
 
     h1 {
       max-width: 16ch;
-      margin-bottom: 18px;
-      font-size: clamp(2.55rem, 6.8vw, 5.9rem);
-      line-height: .93;
+      margin-bottom: 20px;
+      font-size: 5.5rem;
+      line-height: .95;
       text-wrap: balance;
     }
 
     h2 {
       margin-bottom: 12px;
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      line-height: 1.05;
+      font-size: 2.125rem;
+      line-height: 1.08;
       text-wrap: balance;
     }
 
     h3 {
       margin-bottom: 8px;
-      font-size: 1rem;
+      font-size: 1.02rem;
       line-height: 1.25;
       text-wrap: balance;
     }
@@ -228,15 +241,16 @@
     p,
     li {
       color: var(--muted);
-      font-size: .95rem;
-      line-height: 1.65;
+      font-size: .96rem;
+      line-height: 1.62;
       text-wrap: pretty;
     }
 
     .lede {
-      max-width: 68ch;
+      max-width: 64ch;
       margin-bottom: 24px;
-      font-size: 1rem;
+      font-size: 1.08rem;
+      line-height: 1.62;
     }
 
     .actions {
@@ -306,7 +320,7 @@
 
     .status-row strong {
       display: block;
-      font-size: .9rem;
+      font-size: .94rem;
       line-height: 1.3;
     }
 
@@ -314,18 +328,18 @@
       display: block;
       margin-top: 4px;
       color: var(--muted);
-      font-size: .75rem;
+      font-size: .78rem;
       line-height: 1.45;
     }
 
     .section {
-      margin-top: 20px;
+      margin-top: 24px;
     }
 
     .readiness {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
+      gap: 20px;
       align-items: center;
       padding: 18px;
     }
@@ -352,6 +366,7 @@
       border-radius: 999px;
       padding: 4px 9px;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
     .badge {
@@ -382,34 +397,34 @@
     .content-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 330px;
-      gap: 20px;
+      gap: 24px;
       align-items: start;
     }
 
     .stack {
       display: grid;
-      gap: 16px;
+      gap: 18px;
     }
 
     .card {
-      padding: 18px;
+      padding: 20px;
     }
 
     .material-grid {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 10px;
+      gap: 12px;
     }
 
     .material {
       display: grid;
       min-height: 148px;
       align-content: space-between;
-      gap: 18px;
-      border-radius: 14px;
+      gap: 16px;
+      border-radius: var(--radius-inner);
       background: var(--panel-soft);
       box-shadow: 0 0 0 1px var(--line);
-      padding: 14px;
+      padding: 16px;
       text-decoration: none;
       transition-duration: 160ms;
       transition-property: background-color, box-shadow, transform;
@@ -430,7 +445,7 @@
     .material p {
       margin-bottom: 0;
       font-size: .78rem;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .file {
@@ -446,7 +461,7 @@
 
     .table-wrap {
       overflow-x: auto;
-      border-radius: 14px;
+      border-radius: var(--radius-inner);
       box-shadow: 0 0 0 1px var(--line);
     }
 
@@ -466,6 +481,7 @@
 
     .table th {
       color: var(--faint);
+      font-size: .74rem;
       font-weight: 700;
       text-transform: uppercase;
     }
@@ -481,7 +497,7 @@
     .table strong {
       display: block;
       color: var(--text);
-      font-size: .86rem;
+      font-size: .9rem;
       line-height: 1.35;
     }
 
@@ -573,7 +589,7 @@
 
     .timeline-body strong {
       color: var(--text);
-      font-size: .92rem;
+      font-size: .96rem;
     }
 
     .diff {
@@ -592,6 +608,8 @@
       border-bottom: 1px solid var(--line);
       color: var(--faint);
       font-size: .72rem;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
 
     .diff-line {
@@ -600,7 +618,7 @@
       gap: 10px;
       padding: 5px 12px;
       color: var(--muted);
-      font-size: .76rem;
+      font-size: .78rem;
     }
 
     .diff-line.add {
@@ -656,8 +674,9 @@
 
     .comment time {
       color: var(--faint);
-      font-size: .7rem;
+      font-size: .72rem;
       font-weight: 400;
+      font-variant-numeric: tabular-nums;
     }
 
     form {
@@ -669,6 +688,7 @@
       display: grid;
       gap: 7px;
       color: var(--muted);
+      font-family: var(--font-mono);
       font-size: .76rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -678,7 +698,7 @@
       min-height: 44px;
       width: 100%;
       border: 0;
-      border-radius: 10px;
+      border-radius: var(--radius-inner);
       background: #0c0d0e;
       color: var(--text);
       box-shadow: 0 0 0 1px var(--line);
@@ -710,6 +730,7 @@
       align-items: center;
       overflow-wrap: anywhere;
       color: var(--ring);
+      font-family: var(--font-mono);
       font-size: .78rem;
     }
 
@@ -725,13 +746,17 @@
     footer {
       margin-top: 24px;
       color: var(--faint);
-      font-size: .76rem;
+      font-size: .78rem;
     }
 
-    @media (max-width: 1040px) {
+    @media (max-width: 1120px) {
       .hero,
       .content-grid {
         grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 4.25rem;
       }
 
       .material-grid {
@@ -739,7 +764,7 @@
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 720px) {
       .shell {
         width: min(100vw - 24px, 1220px);
         padding-top: 18px;
@@ -764,11 +789,30 @@
 
       h1 {
         max-width: none;
-        font-size: clamp(2rem, 12vw, 3.35rem);
+        font-size: 3.1rem;
+      }
+
+      h2 {
+        font-size: 1.65rem;
+        line-height: 1.12;
       }
 
       .material-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .shell {
+        width: min(100vw - 20px, 1220px);
+      }
+
+      h1 {
+        font-size: 2.65rem;
+      }
+
+      .lede {
+        font-size: 1rem;
       }
     }
 
