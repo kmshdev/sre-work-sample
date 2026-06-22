@@ -13,10 +13,34 @@ would help operate a small but critical runtime fleet. We do not expect producti
 breadth. We do expect a clear operational model, repeatable local evidence,
 release-safety thinking, and tradeoffs you can defend.
 
+## Starter scaffold
+
+This repository includes a small Python 3.11 starter scaffold so you have a
+fresh-checkout path on day one. It is not a completed solution. Replace or extend
+it as needed.
+
+```sh
+make setup
+make test
+make smoke
+make run
+```
+
+The scaffold gives you:
+
+- `src/sre_work_sample/` for the local control surface and runtime-fleet model.
+- `tests/` for behavior tests.
+- `docs/` for architecture and operations notes.
+- `evidence/` for captured proof artifacts.
+- `.github/workflows/validate.yml` for repeatable validation.
+- `SUBMISSION.md`, `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and
+  `DEFENSE_NOTES.md` placeholders.
+
 ## Core premise
 
-This repository does not provide an application to patch. Build or assemble the
-smallest local system needed to demonstrate your operational model.
+This repository provides only a starter scaffold, not the assessment
+implementation. Build or assemble the smallest local system needed to
+demonstrate your operational model.
 
 Your submission must run from a fresh checkout without paid infrastructure or
 real external accounts. Use fake data, local services, disposable resources, and
