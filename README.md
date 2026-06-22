@@ -1,35 +1,30 @@
-# 2026 Site Reliability Engineering Work Sample
+# SRE Take-Home: Market Data Freshness
 
 Open the live assignment packet first:
 <https://kmshdev.github.io/sre-work-sample/>.
 
-Build a small local system that shows how you would operate a critical runtime
-platform. The reviewer must be able to clone your repository, run your commands,
-trigger failures, inspect evidence, and understand your tradeoffs.
+This repository is the starter template for the assignment. It gives you a small
+Python command-line application, three fictional market-data feeds, tests, and a
+GitHub Actions workflow. Your job is to make the local system operationally
+credible.
 
-The assessment window is **7 calendar days**.
+The assessment window is **6 calendar days**. Expect **6-8 focused hours**.
 
 ## Table of contents
 
-- [Starter baseline](#the-starter-gives-you-a-runnable-baseline)
-- [Assignment files](#the-assignment-files-have-one-job-each)
-- [Runtime slice](#your-task-is-to-operate-three-simulated-runtimes)
-- [Hard gates](#the-hard-gates-must-pass-before-review)
-- [Health model](#the-health-model-must-fail-closed)
-- [Evidence](#evidence-must-make-behavior-reproducible)
-- [Failure scenarios](#failure-scenarios-must-show-detection-and-recovery)
-- [Release safety](#release-safety-must-show-blast-radius-control)
-- [Submission report](#the-report-must-separate-facts-from-plans)
-- [Constraints](#the-constraints-keep-the-review-local-and-safe)
-- [AI usage](#ai-tool-use-must-be-disclosed-and-verified)
-- [No-agent incident](#the-no-agent-incident-answer-must-be-written-by-you)
-- [Follow-up interview](#the-follow-up-interview-will-test-your-tradeoffs)
+- [Start with the runnable baseline](#start-with-the-runnable-baseline)
+- [Use each assignment file for one job](#use-each-assignment-file-for-one-job)
+- [Make freshness the operating problem](#make-freshness-the-operating-problem)
+- [Pass the hard gates first](#pass-the-hard-gates-first)
+- [Separate liveness from safe-to-serve eligibility](#separate-liveness-from-safe-to-serve)
+- [Show evidence another engineer can rerun](#show-evidence-another-engineer-can-rerun)
+- [Use GitHub Actions as the delivery gate](#use-github-actions-as-the-delivery-gate)
+- [Write the incident note in the submission](#write-the-incident-note-in-the-submission)
+- [Keep the review local and safe](#keep-the-review-local-and-safe)
+- [Disclose AI tool use](#disclose-ai-tool-use)
+- [Prepare for the follow-up interview](#prepare-for-the-follow-up-interview)
 
-## The starter gives you a runnable baseline
-
-This repository is a starter template, not a solution. It includes a small
-Python scaffold so the first checkout already has tests, a smoke command, and a
-place for evidence.
+## Start with the runnable baseline
 
 Run the starter before changing it:
 
@@ -37,196 +32,158 @@ Run the starter before changing it:
 make setup
 make test
 make smoke
-make run
+```
+
+Useful direct commands:
+
+```sh
+.venv/bin/python -m sre_work_sample.cli status
+tmp=/tmp/bravo-stale.json
+.venv/bin/python -m sre_work_sample.cli scenario stale --feed bravo --output "$tmp"
+.venv/bin/python -m sre_work_sample.cli status --state /tmp/bravo-stale.json
+.venv/bin/python -m sre_work_sample.cli recover \
+  --feed bravo \
+  --state /tmp/bravo-stale.json \
+  --output /tmp/bravo-recovered.json
+.venv/bin/python -m sre_work_sample.cli status --state /tmp/bravo-recovered.json
 ```
 
 The starter includes:
 
-- `src/sre_work_sample/` for the local runtime model and control surface.
+- `src/sre_work_sample/` for the freshness model and command-line interface.
 - `tests/` for behavior tests.
-- `docs/ARCHITECTURE.md` for system shape and tradeoffs.
+- `data/healthy.json` for a simple fixture.
+- `docs/ARCHITECTURE.md` for health-model and design notes.
 - `docs/OPERATIONS.md` for runbooks, alerts, and recovery steps.
 - `evidence/` for logs, screenshots, transcripts, and command output.
 - `.github/workflows/validate.yml` for repeatable validation.
-- `SUBMISSION.md`, `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and
-  `DEFENSE_NOTES.md` placeholders.
+- `SUBMISSION.md`, `AI_USAGE.md`, `INCIDENT_NOTE.md`, and `DEFENSE_NOTES.md`
+  placeholders.
 
-You may replace the scaffold if another stack makes the work clearer. Keep the
-fresh-checkout path and smoke command working.
+You may change the starter. Keep the fresh-checkout path and smoke command
+working.
 
-## The assignment files have one job each
-
-Use the files below as the main reading path:
+## Use each assignment file for one job
 
 | File | Purpose |
 | --- | --- |
 | `index.html` | Browser entry point for the candidate packet. |
 | `README.md` | Authoritative assignment specification. |
-| `CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 7-day window. |
-| `HEALTH_MODEL_GUIDE.html` | Guidance for liveness, safety, and blocked work. |
+| `CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 6-day window. |
+| `HEALTH_MODEL_GUIDE.html` | Guidance for liveness, freshness, and blocked work. |
 | `EVIDENCE_AND_VALIDATION_GUIDE.html` | Guidance for proof and rerunnable commands. |
 | `SUBMISSION_TEMPLATE.md` | Structure for the final report in `SUBMISSION.md`. |
+| `SUBMISSION.md` | Your completed report. |
 | `AI_USAGE.md` | Disclosure and verification notes for AI-assisted work. |
-| `NO_AGENT_INCIDENT.md` | Human-written incident response segment. |
+| `INCIDENT_NOTE.md` | Concise first-30-minute incident response note. |
 | `DEFENSE_NOTES.md` | Notes for the follow-up technical discussion. |
 
-## Your task is to operate three simulated runtimes
+## Make freshness the operating problem
 
-Build the smallest local slice that proves your operating model.
+The fictional service has three market-data feeds:
 
-Your implementation must include:
+- `alpha`
+- `bravo`
+- `charlie`
 
-- One operator control surface, such as a command-line interface, local web
-  page, terminal interface, or local application programming interface.
-- Three simulated runtimes with separate identities or configuration.
-- One mock external dependency, such as a fake data feed, account service,
-  gateway, queue, or platform service.
-- One pause or block operation that prevents unsafe work without deleting state.
-- Health states for the states exercised by your implementation.
-- A repeatable delivery path that runs validation and smoke checks.
-- Two operational failure scenarios implemented end to end.
-- One bad rollout or bad configuration scenario tied to release safety.
+Each feed can be alive while its data is stale. A process that answers requests
+is not automatically safe for downstream work.
 
-Use fake data and local services. Don't connect to real customer, production
-account, payment, or secret-bearing systems.
+Your implementation must show:
 
-## The hard gates must pass before review
+- A status view for all three feeds.
+- Stale data detection for at least one feed.
+- Fail-closed behavior when a feed is stale or unknown.
+- A recovery path that restores eligibility.
+- A bad-configuration or rollback-safety note.
+- Observability evidence: freshness signal, liveness signal, page threshold, and
+  ticket threshold.
 
-The reviewer will stop early if the hard gates are missing.
+## Pass the hard gates first
 
-- **Fresh checkout:** setup, start, smoke, and cleanup commands in `SUBMISSION.md`.
-- **Smoke command:** one command that checks control, runtimes, dependency, and
-  health in `SUBMISSION.md`.
-- **Delivery path:** repeatable validation and release-safety evidence in a
-  workflow, script, or transcript.
-- **Health model:** clear split between liveness and safe operation in
-  `docs/ARCHITECTURE.md`.
-- **Two failures:** trigger, detection, blocked work, recovery, and evidence in
-  `evidence/` and `SUBMISSION.md`.
-- **Release safety:** bad rollout or bad config implemented end to end in
-  `SUBMISSION.md`.
-- **No-agent incident:** human-written incident response in `NO_AGENT_INCIDENT.md`.
+The reviewer will stop early if a hard gate fails.
 
-If a command needs a specific tool version, fake environment variable, or local
-data file, document it before the command.
+- **Fresh checkout:** setup, test, smoke, and cleanup commands work.
+- **Local tests:** `make test` passes.
+- **Smoke command:** `make smoke` proves healthy, stale, and recovered states.
+- **GitHub Actions:** the workflow runs setup, tests, smoke, and docs validation.
+- **Stale feed behavior:** one feed can fail closed while others remain eligible.
+- **Recovery:** a reviewer can reproduce recovery from a stale feed state.
+- **Incident note:** `INCIDENT_NOTE.md` or the submission report answers the
+  incident prompt.
+- **Constraints:** no real accounts, paid services, or secrets are required.
 
-## The health model must fail closed
+## Separate liveness from safe-to-serve
 
-A running process isn't always safe to operate.
+Use `docs/ARCHITECTURE.md` and `HEALTH_MODEL_GUIDE.html` to explain the health
+model.
 
-Separate two questions:
+At minimum, make these fields visible:
 
-- **Process liveness:** Can the runtime answer?
-- **Operational eligibility:** Is the runtime safe to perform unsafe work?
+- `alive`: whether the feed consumer can answer.
+- `last_tick_age_seconds`: age of the newest known tick.
+- `freshness_status`: `fresh`, `stale`, or `unknown`.
+- `safe_to_serve`: whether unsafe downstream work may continue.
+- `allowed_actions`: work still permitted for the feed.
+- `blocked_reason`: why unsafe work is blocked.
 
-Define only the states your slice uses. Common examples include:
+Strong submissions make partial failure obvious. If only `bravo` is stale,
+`bravo` should fail closed while `alpha` and `charlie` remain eligible.
 
-- `healthy`
-- `degraded_dependency`
-- `degraded_data_stale`
-- `paused_by_operator`
-- `incident_active`
-- `maintenance_or_rollout`
+## Show evidence another engineer can rerun
 
-For each state, document:
+Evidence should be concrete. Prefer command output, workflow logs, JSON, test
+output, and short notes over long prose.
 
-- The signal that enters the state.
-- What the operator sees.
-- Which actions remain allowed.
-- Which actions are blocked.
-- Which alert, ticket, annotation, or runbook applies.
-- How the runtime exits the state.
+Include evidence for:
 
-Use [`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) for examples.
+- Healthy status.
+- Stale `bravo` or another chosen feed.
+- Blocked unsafe actions.
+- Recovery.
+- GitHub Actions validation.
+- Alert thresholds and owner/action notes.
 
-## Evidence must make behavior reproducible
+Use `EVIDENCE_AND_VALIDATION_GUIDE.html` to check evidence quality.
 
-Evidence should let another engineer inspect what happened and rerun what
-matters.
+## Use GitHub Actions as the delivery gate
 
-Useful evidence includes:
+GitHub Actions is required. The included workflow runs:
 
-- Commands with expected output or captured output.
-- Structured logs with runtime, state, dependency, and timestamp.
-- Metric samples or dashboard screenshots.
-- Workflow runs or local validation transcripts.
-- Failure-trigger commands and recovery commands.
-- Short notes that explain what each artifact proves.
+- Python install.
+- Unit tests.
+- Smoke check.
+- Candidate documentation validation.
 
-Use [`EVIDENCE_AND_VALIDATION_GUIDE.html`](EVIDENCE_AND_VALIDATION_GUIDE.html)
-to check evidence quality.
+You may extend the workflow. Keep it fast and deterministic.
 
-## Failure scenarios must show detection and recovery
+## Write the incident note in the submission
 
-Implement two operational failure scenarios end to end.
+Answer this prompt in `INCIDENT_NOTE.md` or inside `SUBMISSION.md`:
 
-Good scenario choices include:
+> At 09:37, the service is reachable and latency is normal, but `bravo` has not
+> received fresh ticks for 11 minutes. `alpha` and `charlie` are fresh.
+> Operators ask whether downstream work should continue. What do you do in the
+> first 30 minutes?
 
-- A runtime crash or restart.
-- A mock dependency outage or timeout.
-- Stale data while the runtime process is still alive.
-- A reconciliation failure or mismatched local state.
-- A bad rollout or bad configuration affecting only part of the fleet.
+Cover severity, first five checks, the block/allow decision, notification,
+operator-facing status, first runbook action, and closure evidence.
 
-For each implemented scenario, show:
-
-- How to trigger the failure.
-- How the system detects the failure.
-- Which runtime or platform state changes.
-- What becomes blocked and what remains allowed.
-- Which alert, ticket, annotation, or runbook path applies.
-- How to recover.
-- Which evidence proves the scenario worked.
-
-Document any scenarios you intentionally defer. Explain how you would implement
-and validate them with more time.
-
-## Release safety must show blast-radius control
-
-One of the two implemented failure scenarios must be a bad rollout or bad
-configuration.
-
-The release-safety scenario must show validation, promotion or rejection,
-rollback, and blast-radius control. Document any additional release-safety ideas
-as future work.
-
-Kubernetes, Terraform, Helm, and GitOps are optional. Use them only if they make
-the local evidence clearer.
-
-## The report must separate facts from plans
-
-Use [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md) for your final report.
-Replace `SUBMISSION.md` with your completed report.
-
-Your report must include:
-
-- What you built.
-- How to run it from a fresh checkout.
-- Smoke command and expected output.
-- Health states and blocked actions.
-- Two implemented failure scenarios.
-- Release-safety scenario evidence.
-- Delivery automation evidence.
-- Security and operator-control assumptions.
-- What you intentionally didn't build.
-- What you would do next with more time.
-- Links to `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and `DEFENSE_NOTES.md`.
-
-## The constraints keep the review local and safe
+## Keep the review local and safe
 
 Follow these constraints:
 
-- Don't include real secrets.
-- Don't require paid infrastructure.
-- Don't depend on real external accounts.
-- Don't hide failure behind restart-only recovery.
-- Don't make the assignment depend on one vendor unless the reason is clear.
-- Don't add broad production scope that your evidence doesn't exercise.
-- Don't spend time on visual polish at the cost of operational evidence.
+- Do not include real secrets.
+- Do not require paid infrastructure.
+- Do not depend on real external accounts.
+- Do not connect to real trading, broker, exchange, or customer systems.
+- Do not hide failure behind restart-only recovery.
+- Do not make Kubernetes, Terraform, DNS, BGP, or cloud deployment required.
+- Do not spend time on visual polish at the cost of operational evidence.
 
-## AI tool use must be disclosed and verified
+## Disclose AI tool use
 
-AI coding tools are allowed, but you own the output.
+AI coding tools are allowed. You own the output.
 
 If you use AI tools, complete `AI_USAGE.md` with:
 
@@ -237,24 +194,18 @@ If you use AI tools, complete `AI_USAGE.md` with:
 - How you caught the problem.
 - Verification you ran yourself.
 
-If you don't use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
+If you do not use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
 
-## The no-agent incident answer must be written by you
-
-Complete `NO_AGENT_INCIDENT.md` without coding agents or large language models.
-
-Use normal documentation, shell tools, man pages, and your own notes. The file
-should show how you reason during the first 30 minutes of an incident.
-
-## The follow-up interview will test your tradeoffs
+## Prepare for the follow-up interview
 
 Expect questions about:
 
-- Why you chose your stack.
-- How your health model blocks unsafe work.
-- What your alerts page on and what they deliberately don't page on.
-- How your delivery path supports validation, promotion, and rollback.
-- How the local slice would grow to 20-50 runtimes.
+- How the health model blocks unsafe work.
+- Which alert pages and which alert only creates a ticket.
+- How to roll out a feed freshness threshold safely.
+- How the model would scale from three feeds to many feed boundaries.
+- What Kubernetes, Terraform, managed continuous integration, or edge
+  infrastructure would add.
 - How you used or avoided AI tools.
 - What you would change before production.
 

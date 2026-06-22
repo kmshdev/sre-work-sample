@@ -1,1266 +1,143 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <title>Critical Runtime Operations Platform | SRE Work Sample</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      color-scheme: dark;
-      --bg: #0f1011;
-      --panel: #151617;
-      --panel-strong: #1b1c1e;
-      --panel-soft: #111213;
-      --line: #2d2f33;
-      --line-strong: #46494f;
-      --text: #f3f1eb;
-      --muted: #a8a29a;
-      --faint: #746f68;
-      --green: #64d597;
-      --amber: #dfb15d;
-      --red: #ef7d70;
-      --violet: #b69cff;
-      --sky: #78c7f0;
-      --blue: #85a7ff;
-      --ring: #d8b46a;
-      --radius-panel: 18px;
-      --radius-inner: 12px;
-      --shadow:
-        0 0 0 1px rgba(255, 255, 255, .08),
-        0 16px 44px rgba(0, 0, 0, .36);
-      --font-ui:
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      --font-mono:
-        "IBM Plex Mono",
-        "SFMono-Regular",
-        Consolas,
-        "Liberation Mono",
-        monospace;
-      font-family: var(--font-ui);
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    body {
-      margin: 0;
-      background:
-        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .028) 1px, transparent 1px),
-        radial-gradient(circle at 20% 0, rgba(223, 177, 93, .1), transparent 36rem),
-        radial-gradient(circle at 88% 8%, rgba(120, 199, 240, .08), transparent 30rem),
-        var(--bg);
-      background-size: 34px 34px, 34px 34px, auto, auto, auto;
-    }
-
-    a {
-      color: inherit;
-      text-decoration-color: rgba(216, 180, 106, .8);
-      text-decoration-thickness: 1px;
-      text-underline-offset: 4px;
-    }
-
-    a:hover {
-      color: var(--ring);
-    }
-
-    a:focus-visible,
-    button:focus-visible,
-    input:focus-visible {
-      outline: 2px solid var(--ring);
-      outline-offset: 3px;
-    }
-
-    button,
-    input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    code {
-      color: var(--text);
-      font-family: var(--font-mono);
-      font-size: .95em;
-    }
-
-    .shell {
-      width: min(1220px, calc(100vw - 32px));
-      margin: 0 auto;
-      padding: 32px 0 48px;
-    }
-
-    .topbar {
-      display: flex;
-      min-height: 52px;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .crumbs,
-    .nav,
-    .label,
-    .eyebrow,
-    .meta,
-    .badge,
-    .table,
-    .button,
-    button,
-    input,
-    .status-line {
-      font-family: var(--font-mono);
-      font-size: .78rem;
-      line-height: 1.2;
-    }
-
-    .crumbs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      color: var(--muted);
-      text-transform: uppercase;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .crumbs strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .nav a,
-    .button,
-    button {
-      display: inline-flex;
-      min-height: 44px;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: 0;
-      border-radius: var(--radius-inner);
-      background: var(--panel);
-      color: var(--text);
-      box-shadow: 0 0 0 1px var(--line);
-      padding: 0 14px;
-      text-decoration: none;
-      transition-duration: 160ms;
-      transition-property: background-color, box-shadow, color, transform;
-      transition-timing-function: ease-out;
-    }
-
-    .nav a:hover,
-    .button:hover,
-    button:hover {
-      background: var(--panel-strong);
-      box-shadow: 0 0 0 1px var(--line-strong);
-      transform: translateY(-1px);
-    }
-
-    .nav a:active,
-    .button:active,
-    button:active {
-      transform: scale(.96);
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 20px;
-      align-items: stretch;
-    }
-
-    .panel {
-      min-width: 0;
-      border-radius: var(--radius-panel);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, .026), transparent 34%),
-        var(--panel);
-      box-shadow: var(--shadow);
-    }
-
-    .hero-main {
-      padding: clamp(24px, 5vw, 44px);
-    }
-
-    .eyebrow {
-      margin: 0 0 14px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    h1,
-    h2,
-    h3,
-    p {
-      margin-top: 0;
-    }
-
-    h1 {
-      max-width: 16ch;
-      margin-bottom: 20px;
-      font-size: 5.5rem;
-      line-height: .95;
-      text-wrap: balance;
-    }
-
-    h2 {
-      margin-bottom: 12px;
-      font-size: 2.125rem;
-      line-height: 1.08;
-      text-wrap: balance;
-    }
-
-    h3 {
-      margin-bottom: 8px;
-      font-size: 1.02rem;
-      line-height: 1.25;
-      text-wrap: balance;
-    }
-
-    p,
-    li {
-      color: var(--muted);
-      font-size: .96rem;
-      line-height: 1.62;
-      text-wrap: pretty;
-    }
-
-    .lede {
-      max-width: 64ch;
-      margin-bottom: 24px;
-      font-size: 1.08rem;
-      line-height: 1.62;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .button.primary,
-    button.primary {
-      background: var(--text);
-      color: var(--bg);
-      box-shadow: 0 0 0 1px var(--text);
-      font-weight: 800;
-    }
-
-    .button.primary:hover,
-    button.primary:hover {
-      background: var(--ring);
-      box-shadow: 0 0 0 1px var(--ring);
-      color: #15110a;
-    }
-
-    .sidebar {
-      padding: 18px;
-    }
-
-    .status-card {
-      display: grid;
-      gap: 14px;
-      margin-top: 14px;
-    }
-
-    .status-row {
-      display: flex;
-      gap: 12px;
-      align-items: start;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .status-row:last-child {
-      padding-bottom: 0;
-      border-bottom: 0;
-    }
-
-    .dot {
-      display: inline-flex;
-      width: 22px;
-      height: 22px;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: rgba(100, 213, 151, .12);
-      color: var(--green);
-      box-shadow: 0 0 0 1px rgba(100, 213, 151, .32);
-      font-size: .72rem;
-      font-weight: 800;
-    }
-
-    .dot.wait {
-      background: rgba(223, 177, 93, .12);
-      color: var(--amber);
-      box-shadow: 0 0 0 1px rgba(223, 177, 93, .3);
-    }
-
-    .status-row strong {
-      display: block;
-      font-size: .94rem;
-      line-height: 1.3;
-    }
-
-    .status-row span:last-child {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: .78rem;
-      line-height: 1.45;
-    }
-
-    .section {
-      margin-top: 24px;
-    }
-
-    .readiness {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 20px;
-      align-items: center;
-      padding: 18px;
-    }
-
-    .readiness h2 {
-      margin-bottom: 6px;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 14px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .badge,
-    .chip {
-      display: inline-flex;
-      min-height: 26px;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 4px 9px;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .badge {
-      background: rgba(255, 255, 255, .05);
-      color: var(--muted);
-      box-shadow: 0 0 0 1px var(--line);
-      text-transform: uppercase;
-    }
-
-    .badge.ok {
-      background: rgba(100, 213, 151, .1);
-      color: var(--green);
-      box-shadow: 0 0 0 1px rgba(100, 213, 151, .25);
-    }
-
-    .badge.warn {
-      background: rgba(223, 177, 93, .1);
-      color: var(--amber);
-      box-shadow: 0 0 0 1px rgba(223, 177, 93, .25);
-    }
-
-    .badge.review {
-      background: rgba(182, 156, 255, .1);
-      color: var(--violet);
-      box-shadow: 0 0 0 1px rgba(182, 156, 255, .25);
-    }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
-      gap: 24px;
-      align-items: start;
-    }
-
-    .stack {
-      display: grid;
-      gap: 18px;
-    }
-
-    .card {
-      padding: 20px;
-    }
-
-    .material-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .material {
-      display: grid;
-      min-height: 148px;
-      align-content: space-between;
-      gap: 16px;
-      border-radius: var(--radius-inner);
-      background: var(--panel-soft);
-      box-shadow: 0 0 0 1px var(--line);
-      padding: 16px;
-      text-decoration: none;
-      transition-duration: 160ms;
-      transition-property: background-color, box-shadow, transform;
-      transition-timing-function: ease-out;
-    }
-
-    .material:hover,
-    .material:focus-visible {
-      background: var(--panel-strong);
-      box-shadow: 0 0 0 1px var(--line-strong);
-      transform: translateY(-2px);
-    }
-
-    .material:active {
-      transform: scale(.96);
-    }
-
-    .material p {
-      margin-bottom: 0;
-      font-size: .78rem;
-      line-height: 1.5;
-    }
-
-    .file {
-      width: max-content;
-      border-radius: 999px;
-      background: rgba(223, 177, 93, .12);
-      color: var(--amber);
-      box-shadow: 0 0 0 1px rgba(223, 177, 93, .25);
-      padding: 5px 8px;
-      font-size: .68rem;
-      text-transform: uppercase;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: var(--radius-inner);
-      box-shadow: 0 0 0 1px var(--line);
-    }
-
-    .table {
-      width: 100%;
-      min-width: 780px;
-      border-collapse: collapse;
-    }
-
-    .table th,
-    .table td {
-      padding: 13px 14px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    .table th {
-      color: var(--faint);
-      font-size: .74rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .table tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .table td {
-      color: var(--muted);
-    }
-
-    .table strong {
-      display: block;
-      color: var(--text);
-      font-size: .9rem;
-      line-height: 1.35;
-    }
-
-    .table .mono {
-      color: var(--faint);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .chip {
-      background: rgba(255, 255, 255, .045);
-      color: var(--muted);
-      box-shadow: 0 0 0 1px var(--line);
-      font-size: .7rem;
-    }
-
-    .chip.red {
-      color: var(--red);
-      box-shadow: 0 0 0 1px rgba(239, 125, 112, .25);
-    }
-
-    .chip.sky {
-      color: var(--sky);
-      box-shadow: 0 0 0 1px rgba(120, 199, 240, .25);
-    }
-
-    .chip.violet {
-      color: var(--violet);
-      box-shadow: 0 0 0 1px rgba(182, 156, 255, .25);
-    }
-
-    .timeline {
-      display: grid;
-      gap: 0;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .timeline li {
-      display: grid;
-      grid-template-columns: 28px minmax(0, 1fr);
-      gap: 12px;
-      color: var(--muted);
-    }
-
-    .timeline li + li .timeline-body {
-      padding-top: 14px;
-    }
-
-    .timeline-rail {
-      display: grid;
-      justify-items: center;
-    }
-
-    .timeline-rail::after {
-      content: "";
-      width: 1px;
-      min-height: 100%;
-      background: var(--line);
-    }
-
-    .timeline li:last-child .timeline-rail::after {
-      background: transparent;
-    }
-
-    .timeline-icon {
-      display: inline-flex;
-      width: 28px;
-      height: 28px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: var(--panel-strong);
-      box-shadow: 0 0 0 1px var(--line);
-      color: var(--text);
-      font-size: .76rem;
-      font-weight: 800;
-    }
-
-    .timeline-body {
-      padding-bottom: 16px;
-    }
-
-    .timeline-body strong {
-      color: var(--text);
-      font-size: .96rem;
-    }
-
-    .diff {
-      margin-top: 10px;
-      overflow: hidden;
-      border-radius: 12px;
-      background: #0b0c0d;
-      box-shadow: 0 0 0 1px var(--line);
-    }
-
-    .diff-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 12px;
-      border-bottom: 1px solid var(--line);
-      color: var(--faint);
-      font-size: .72rem;
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .diff-line {
-      display: grid;
-      grid-template-columns: 26px minmax(0, 1fr);
-      gap: 10px;
-      padding: 5px 12px;
-      color: var(--muted);
-      font-size: .78rem;
-    }
-
-    .diff-line.add {
-      background: rgba(100, 213, 151, .09);
-      color: var(--green);
-    }
-
-    .diff-line.warn {
-      background: rgba(223, 177, 93, .08);
-      color: var(--amber);
-    }
-
-    .thread {
-      display: grid;
-      gap: 14px;
-    }
-
-    .anchor-note {
-      border-left: 3px solid var(--amber);
-      border-radius: 0 12px 12px 0;
-      background: rgba(223, 177, 93, .07);
-      padding: 12px 14px;
-      box-shadow: 0 0 0 1px rgba(223, 177, 93, .16);
-    }
-
-    .comment {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
-      gap: 10px;
-    }
-
-    .avatar {
-      display: inline-flex;
-      width: 30px;
-      height: 30px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: rgba(120, 199, 240, .13);
-      color: var(--sky);
-      box-shadow: 0 0 0 1px rgba(120, 199, 240, .22);
-      font-size: .72rem;
-      font-weight: 800;
-    }
-
-    .comment h3 {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: baseline;
-      margin-bottom: 4px;
-    }
-
-    .comment time {
-      color: var(--faint);
-      font-size: .72rem;
-      font-weight: 400;
-      font-variant-numeric: tabular-nums;
-    }
-
-    form {
-      display: grid;
-      gap: 12px;
-    }
-
-    label {
-      display: grid;
-      gap: 7px;
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: .76rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    input {
-      min-height: 44px;
-      width: 100%;
-      border: 0;
-      border-radius: var(--radius-inner);
-      background: #0c0d0e;
-      color: var(--text);
-      box-shadow: 0 0 0 1px var(--line);
-      padding: 0 12px;
-    }
-
-    input[aria-invalid="true"] {
-      box-shadow: 0 0 0 1px var(--red);
-    }
-
-    .status-line {
-      min-height: 20px;
-      margin: 0;
-      color: var(--red);
-    }
-
-    .route-output {
-      display: grid;
-      gap: 8px;
-      border-radius: 12px;
-      background: #0c0d0e;
-      box-shadow: 0 0 0 1px var(--line);
-      padding: 12px;
-    }
-
-    .route-output a {
-      display: inline-flex;
-      min-height: 44px;
-      align-items: center;
-      overflow-wrap: anywhere;
-      color: var(--ring);
-      font-family: var(--font-mono);
-      font-size: .78rem;
-    }
-
-    .noscript {
-      margin-top: 12px;
-      border-radius: 12px;
-      background: rgba(239, 125, 112, .08);
-      color: var(--text);
-      box-shadow: 0 0 0 1px rgba(239, 125, 112, .25);
-      padding: 12px;
-    }
-
-    footer {
-      margin-top: 24px;
-      color: var(--faint);
-      font-size: .78rem;
-    }
-
-    @media (max-width: 1120px) {
-      .hero,
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
-
-      h1 {
-        font-size: 4.25rem;
-      }
-
-      .material-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 720px) {
-      .shell {
-        width: min(100vw - 24px, 1220px);
-        padding-top: 18px;
-      }
-
-      .topbar,
-      .readiness {
-        align-items: stretch;
-        grid-template-columns: 1fr;
-        flex-direction: column;
-      }
-
-      .nav {
-        justify-content: flex-start;
-      }
-
-      .hero-main,
-      .sidebar,
-      .card {
-        padding: 16px;
-      }
-
-      h1 {
-        max-width: none;
-        font-size: 3.1rem;
-      }
-
-      h2 {
-        font-size: 1.65rem;
-        line-height: 1.12;
-      }
-
-      .material-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .shell {
-        width: min(100vw - 20px, 1220px);
-      }
-
-      h1 {
-        font-size: 2.65rem;
-      }
-
-      .lede {
-        font-size: 1rem;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .nav a,
-      .button,
-      button,
-      .material {
-        transition-duration: 1ms;
-      }
-
-      .nav a:hover,
-      .button:hover,
-      button:hover,
-      .material:hover {
-        transform: none;
-      }
-
-      .nav a:active,
-      .button:active,
-      button:active,
-      .material:active {
-        transform: none;
-      }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRE Take-Home: Market Data Freshness</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #101214;
+    --panel: #171a1d;
+    --line: #30353a;
+    --text: #f4f0e8;
+    --muted: #b9b2a6;
+    --accent: #8dd3c7;
+    --warn: #f2bf6d;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  main { margin: 0 auto; max-width: 1080px; padding: 42px 22px 80px; }
+  header {
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 30px;
+    padding-bottom: 28px;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 5.6rem);
+    line-height: .95;
+    margin: 12px 0 18px;
+    max-width: 10ch;
+  }
+  h2 { margin: 0 0 10px; }
+  p, li { color: var(--muted); }
+  a {
+    color: var(--text);
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
+  }
+  code {
+    background: #23282c;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 1px 5px;
+  }
+  .grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 28px 0;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .links a {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-decoration: none;
+  }
+  .command {
+    background: #070809;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--warn);
+    overflow-x: auto;
+    padding: 14px;
+  }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <nav class="crumbs" aria-label="Assignment location">
-        <span>sre-assessment</span>
-        <span>/</span>
-        <span>work-sample</span>
-        <span>/</span>
-        <strong>2026</strong>
-      </nav>
-      <nav class="nav" aria-label="Page sections">
-        <a href="#materials">Materials</a>
-        <a href="#requirements">Requirements</a>
-        <a href="#evidence">Evidence</a>
-        <a href="#submission">Submit</a>
-      </nav>
-    </header>
+<main>
+  <header>
+    <div class="eyebrow">Senior SRE work sample</div>
+    <h1>Market Data Freshness</h1>
+    <p>
+      Six calendar days, 6-8 focused hours. Make a small local Python system
+      safe, observable, recoverable, and easy to review.
+    </p>
+    <div class="links">
+      <a href="README.md">Assignment README</a>
+      <a href="CANDIDATE_RUNBOOK.html">Candidate runbook</a>
+      <a href="HEALTH_MODEL_GUIDE.html">Health guide</a>
+      <a href="EVIDENCE_AND_VALIDATION_GUIDE.html">Evidence guide</a>
+      <a href="SUBMISSION_TEMPLATE.md">Submission template</a>
+    </div>
+  </header>
 
-    <main>
-      <section class="hero" aria-labelledby="page-title">
-        <div class="panel hero-main">
-          <p class="eyebrow">Senior SRE take-home / candidate packet</p>
-          <h1 id="page-title">Critical Runtime Operations Platform</h1>
-          <p class="lede">
-            Build the smallest local runtime-fleet slice that proves how you
-            operate a critical platform. The reviewer must be able to clone the
-            repo, run the system, trigger failures, inspect evidence, and see
-            how unsafe work is blocked.
-          </p>
-          <div class="actions">
-            <a class="button primary" href="README.md">Read the full spec</a>
-            <a class="button" href="#submission">Generate access route</a>
-          </div>
-        </div>
+  <section class="grid" aria-label="Assignment summary">
+    <article class="card">
+      <h2>Domain</h2>
+      <p>
+        Three fictional feeds: <code>alpha</code>, <code>bravo</code>,
+        and <code>charlie</code>.
+      </p>
+    </article>
+    <article class="card">
+      <h2>Core signal</h2>
+      <p>Separate liveness from safe-to-serve eligibility. Fail closed when data is stale.</p>
+    </article>
+    <article class="card">
+      <h2>Required proof</h2>
+      <p>Fresh checkout, tests, smoke, stale-feed scenario, recovery, and GitHub Actions.</p>
+    </article>
+  </section>
 
-        <aside class="panel sidebar" aria-label="Assessment status">
-          <p class="eyebrow">Assignment shape</p>
-          <div class="status-card">
-            <div class="status-row">
-              <span class="dot">1</span>
-              <span>
-                <strong>7 calendar days</strong>
-                <span>Scope for depth. Do not optimize for surface area.</span>
-              </span>
-            </div>
-            <div class="status-row">
-              <span class="dot">2</span>
-              <span>
-                <strong>3 simulated runtimes</strong>
-                <span>Each needs its own identity, config, and health boundary.</span>
-              </span>
-            </div>
-            <div class="status-row">
-              <span class="dot wait">3</span>
-              <span>
-                <strong>Reviewer access</strong>
-                <span>Invite <code>kmshdev</code> only after the report is ready.</span>
-              </span>
-            </div>
-          </div>
-        </aside>
-      </section>
+  <section>
+    <h2>Fresh checkout run path</h2>
+    <pre class="command"><code>make setup
+make test
+make smoke</code></pre>
+  </section>
 
-      <section class="section panel readiness" aria-labelledby="ready-title">
-        <div>
-          <p class="eyebrow">What must be true at submission</p>
-          <h2 id="ready-title">A submission is reviewable when every gate is green.</h2>
-          <p>
-            Complete the gates below before adding optional scope. A narrow
-            system with concrete evidence is better than a broad system that
-            can't be reproduced from a fresh checkout.
-          </p>
-          <ul class="pill-row">
-            <li><span class="badge ok">Fresh checkout</span></li>
-            <li><span class="badge ok">Smoke command</span></li>
-            <li><span class="badge ok">Delivery automation</span></li>
-            <li><span class="badge warn">Two failure scenarios</span></li>
-            <li><span class="badge review">Release safety</span></li>
-          </ul>
-        </div>
-        <a class="button primary" href="#requirements">Review the gates</a>
-      </section>
-
-      <section id="materials" class="section panel card" aria-labelledby="materials-title">
-        <p class="eyebrow">Required materials</p>
-        <h2 id="materials-title">Read these files before choosing your scope.</h2>
-        <div class="material-grid">
-          <a class="material" href="README.md">
-            <div>
-              <h3>Assignment specification</h3>
-              <p>Authoritative requirements, hard gates, and constraints.</p>
-            </div>
-            <span class="file">README.md</span>
-          </a>
-          <a class="material" href="CANDIDATE_RUNBOOK.html">
-            <div>
-              <h3>Candidate runbook</h3>
-              <p>Pacing guide for a narrow, defensible SRE work sample.</p>
-            </div>
-            <span class="file">HTML guide</span>
-          </a>
-          <a class="material" href="HEALTH_MODEL_GUIDE.html">
-            <div>
-              <h3>Health model guide</h3>
-              <p>How to model process liveness and operational eligibility.</p>
-            </div>
-            <span class="file">HTML guide</span>
-          </a>
-          <a class="material" href="EVIDENCE_AND_VALIDATION_GUIDE.html">
-            <div>
-              <h3>Evidence guide</h3>
-              <p>Proof expectations for setup, delivery, failure, and recovery.</p>
-            </div>
-            <span class="file">HTML guide</span>
-          </a>
-          <a class="material" href="SUBMISSION_TEMPLATE.md">
-            <div>
-              <h3>Submission template</h3>
-              <p>Report shape for commands, tradeoffs, evidence, and AI usage.</p>
-            </div>
-            <span class="file">Template</span>
-          </a>
-        </div>
-      </section>
-
-      <div class="section content-grid">
-        <div class="stack">
-          <section id="requirements" class="panel card" aria-labelledby="requirements-title">
-            <p class="eyebrow">Required gates</p>
-            <h2 id="requirements-title">Close these gates before asking for review.</h2>
-            <div class="table-wrap">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Requirement</th>
-                    <th scope="col">Review gate</th>
-                    <th scope="col">Evidence</th>
-                    <th scope="col">Material</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="mono">SRE-101</td>
-                    <td>
-                      <strong>Fresh checkout run path</strong>
-                      Exact setup, start, smoke, and cleanup commands.
-                    </td>
-                    <td><span class="badge warn">Required</span></td>
-                    <td>
-                      <div class="chips">
-                        <span class="chip red">setup</span>
-                        <span class="chip sky">versions</span>
-                      </div>
-                    </td>
-                    <td><a href="README.md">README</a></td>
-                  </tr>
-                  <tr>
-                    <td class="mono">SRE-102</td>
-                    <td>
-                      <strong>Smoke command</strong>
-                      Verifies control surface, runtimes, dependency, and health.
-                    </td>
-                    <td><span class="badge warn">Required</span></td>
-                    <td>
-                      <div class="chips">
-                        <span class="chip sky">stdout</span>
-                        <span class="chip">exit code</span>
-                      </div>
-                    </td>
-                    <td><a href="EVIDENCE_AND_VALIDATION_GUIDE.html">Evidence</a></td>
-                  </tr>
-                  <tr>
-                    <td class="mono">SRE-103</td>
-                    <td>
-                      <strong>Delivery automation path</strong>
-                      Repeatable validation, promotion, and rollback thinking.
-                    </td>
-                    <td><span class="badge review">Required</span></td>
-                    <td>
-                      <div class="chips">
-                        <span class="chip violet">CI or script</span>
-                        <span class="chip">rollback</span>
-                      </div>
-                    </td>
-                    <td><a href="CANDIDATE_RUNBOOK.html">Runbook</a></td>
-                  </tr>
-                  <tr>
-                    <td class="mono">SRE-104</td>
-                    <td>
-                      <strong>Two operational failure scenarios</strong>
-                      Implemented end to end with detection and recovery.
-                    </td>
-                    <td><span class="badge review">Required</span></td>
-                    <td>
-                      <div class="chips">
-                        <span class="chip red">incident</span>
-                        <span class="chip sky">recovery</span>
-                      </div>
-                    </td>
-                    <td><a href="HEALTH_MODEL_GUIDE.html">Health model</a></td>
-                  </tr>
-                  <tr>
-                    <td class="mono">SRE-105</td>
-                    <td>
-                      <strong>Release-safety scenario</strong>
-                      Bad rollout or bad config with blast-radius controls.
-                    </td>
-                    <td><span class="badge ok">Required</span></td>
-                    <td>
-                      <div class="chips">
-                        <span class="chip">promotion</span>
-                        <span class="chip red">rollback</span>
-                      </div>
-                    </td>
-                    <td><a href="SUBMISSION_TEMPLATE.md">Template</a></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section id="evidence" class="panel card" aria-labelledby="evidence-title">
-            <p class="eyebrow">Evidence trail</p>
-            <h2 id="evidence-title">The reviewer should see a coherent evidence trail.</h2>
-            <ul class="timeline">
-              <li>
-                <span class="timeline-rail"><span class="timeline-icon">C</span></span>
-                <div class="timeline-body">
-                  <strong>The runtime-fleet slice runs locally</strong>
-                  <p>
-                    One operator surface, three simulated runtimes, and one
-                    mock external dependency are runnable from local commands.
-                  </p>
-                </div>
-              </li>
-              <li>
-                <span class="timeline-rail"><span class="timeline-icon">CI</span></span>
-                <div class="timeline-body">
-                  <strong>Smoke validation passes from a clean checkout</strong>
-                  <div class="diff" role="group" aria-label="Smoke evidence example">
-                    <div class="diff-head">
-                      <span>SUBMISSION.md</span>
-                      <span>smoke output</span>
-                    </div>
-                    <div class="diff-line add">
-                      <span>+</span>
-                      <span>runtime-a healthy, runtime-b paused, runtime-c degraded</span>
-                    </div>
-                    <div class="diff-line add">
-                      <span>+</span>
-                      <span>dependency timeout detected and blocked unsafe work</span>
-                    </div>
-                    <div class="diff-line warn">
-                      <span>!</span>
-                      <span>include expected output, not command names alone</span>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <span class="timeline-rail"><span class="timeline-icon">R</span></span>
-                <div class="timeline-body">
-                  <strong>Operational scenarios are defended</strong>
-                  <p>
-                    Each implemented failure shows detection, operator decision,
-                    blocked unsafe work, recovery, and residual risk.
-                  </p>
-                </div>
-              </li>
-              <li>
-                <span class="timeline-rail"><span class="timeline-icon">M</span></span>
-                <div class="timeline-body">
-                  <strong>Submission route is opened</strong>
-                  <p>
-                    Candidate invites <code>kmshdev</code> as collaborator or
-                    reviewer after the repository and report are complete.
-                  </p>
-                </div>
-              </li>
-            </ul>
-          </section>
-        </div>
-
-        <aside class="stack" aria-label="Review notes and submission">
-          <section class="panel card thread" aria-labelledby="thread-title">
-            <p class="eyebrow">Scope guidance</p>
-            <h2 id="thread-title">Build the smallest system that proves judgment.</h2>
-            <p class="anchor-note">
-              The review cares about evidence quality and operational judgment.
-              Do not trade clear failure handling for a larger demo.
-            </p>
-            <article class="comment">
-              <span class="avatar" aria-hidden="true">KM</span>
-              <div>
-                <h3>Reviewer lens <time datetime="2026-06-22">before review</time></h3>
-                <p>
-                  The strongest answer is a small system whose failure modes can
-                  be started, observed, paused, recovered, and explained.
-                </p>
-              </div>
-            </article>
-            <article class="comment">
-              <span class="avatar" aria-hidden="true">SRE</span>
-              <div>
-                <h3>Candidate lens <time datetime="2026-06-22">before submit</time></h3>
-                <p>
-                  If a reviewer can't reproduce the smoke path in one sitting,
-                  tighten the commands before adding more features.
-                </p>
-              </div>
-            </article>
-          </section>
-
-          <section id="submission" class="panel card" aria-labelledby="submit-title">
-            <p class="eyebrow">Submission route</p>
-            <h2 id="submit-title">Invite <code>kmshdev</code> when done.</h2>
-            <p>
-              Enter the final GitHub owner and repository name. The access route
-              is generated locally in this browser.
-            </p>
-            <noscript>
-              <p class="noscript">
-                JavaScript is disabled. Open
-                <code>https://github.com/OWNER/REPOSITORY/settings/access</code>
-                and invite <code>kmshdev</code>.
-              </p>
-            </noscript>
-            <form id="route-form" novalidate>
-              <label>
-                Repository owner
-                <input
-                  id="owner"
-                  name="owner"
-                  autocomplete="organization"
-                  aria-describedby="route-status"
-                  placeholder="your-org"
-                  type="text"
-                >
-              </label>
-              <label>
-                Repository name
-                <input
-                  id="repo"
-                  name="repo"
-                  autocomplete="off"
-                  aria-describedby="route-status"
-                  placeholder="sre-work-sample"
-                  type="text"
-                >
-              </label>
-              <button class="primary" type="submit">Generate contributor route</button>
-              <p id="route-status" class="status-line" aria-live="polite"></p>
-              <section class="route-output" aria-labelledby="route-output-title">
-                <h3 id="route-output-title">Generated access URL</h3>
-                <p>Add <code>kmshdev</code> as collaborator after the work is complete.</p>
-                <a
-                  id="route-link"
-                  href="https://github.com/OWNER/REPOSITORY/settings/access"
-                >
-                  https://github.com/OWNER/REPOSITORY/settings/access
-                </a>
-              </section>
-            </form>
-          </section>
-        </aside>
-      </div>
-    </main>
-
-    <footer>
-      Static assignment portal. No external assets, framework runtime, or data collection.
-    </footer>
-  </div>
-
-  <script>
-    (() => {
-      const form = document.querySelector("#route-form");
-      const owner = document.querySelector("#owner");
-      const repo = document.querySelector("#repo");
-      const status = document.querySelector("#route-status");
-      const link = document.querySelector("#route-link");
-
-      const cleanSegment = value =>
-        value.trim().replace(/^\/+|\/+$/g, "");
-
-      const setStatus = (message, isError) => {
-        status.textContent = message;
-        status.style.color = isError ? "var(--red)" : "var(--green)";
-      };
-
-      const setInvalidState = (ownerMissing, repoMissing) => {
-        owner.setAttribute("aria-invalid", String(ownerMissing));
-        repo.setAttribute("aria-invalid", String(repoMissing));
-      };
-
-      const handleSubmit = event => {
-        event.preventDefault();
-
-        const ownerValue = cleanSegment(owner.value);
-        const repoValue = cleanSegment(repo.value);
-        const ownerMissing = !ownerValue;
-        const repoMissing = !repoValue;
-
-        setInvalidState(ownerMissing, repoMissing);
-
-        if (ownerMissing || repoMissing) {
-          setStatus("Enter both owner and repository name.", true);
-          (ownerMissing ? owner : repo).focus();
-          return;
-        }
-
-        const url = `https://github.com/${ownerValue}/${repoValue}/settings/access`;
-        owner.value = ownerValue;
-        repo.value = repoValue;
-        link.href = url;
-        link.textContent = url;
-        setStatus("Contributor route ready. Invite kmshdev from that page.", false);
-      };
-
-      form.addEventListener("submit", handleSubmit);
-    })();
-  </script>
+  <section>
+    <h2>A submission is reviewable when every gate is green</h2>
+    <ul>
+      <li>Smoke command shows healthy, stale, and recovered states.</li>
+      <li>GitHub Actions runs tests, smoke, and candidate documentation checks.</li>
+      <li>Incident note explains the first 30 minutes of stale <code>bravo</code>.</li>
+      <li>Evidence can be rerun without real accounts, secrets, or paid services.</li>
+    </ul>
+  </section>
+</main>
 </body>
 </html>

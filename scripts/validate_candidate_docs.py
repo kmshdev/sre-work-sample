@@ -16,58 +16,52 @@ CANDIDATE_FILES = [
     "SUBMISSION_TEMPLATE.md",
     "SUBMISSION.md",
     "AI_USAGE.md",
-    "NO_AGENT_INCIDENT.md",
+    "INCIDENT_NOTE.md",
     "DEFENSE_NOTES.md",
     "docs/ARCHITECTURE.md",
     "docs/OPERATIONS.md",
 ]
 
 FORBIDDEN_PHRASES = [
-    "pattern from",
-    "pattern",
-    "supplied shadcn",
-    "registry components",
-    "linked pr context",
-    "merge readiness translated",
-    "issues table",
-    "pull-request timeline",
-    "inline thread",
-    "submission-report.md",
-    ">p0<",
-    ">p1<",
-    ">p2<",
-    "trading",
-    "broker",
-    "exchange",
+    "critical runtime platform",
+    "7 calendar days",
+    "20-50",
+    "NO_AGENT_INCIDENT.md",
+    "no-agent incident",
+    "two operational failure scenarios",
+    "three simulated runtimes",
+    "mock external dependency",
     "release-safety scenario may count",
-    "release-safety evidence or release-safety plan",
-    "probably",
-    "not just command names",
+    "runnable or inspectable",
+    "8-12 focused hours",
+    ".eval/",
 ]
 
 REQUIRED_README_PHRASES = [
     "Table of contents",
-    "fresh checkout",
-    "three simulated runtimes",
-    "mock external dependency",
-    "pause or block",
-    "two operational failure scenarios",
-    "bad rollout or bad configuration",
-    "NO_AGENT_INCIDENT.md",
+    "6 calendar days",
+    "6-8 focused hours",
+    "Market Data Freshness",
+    "alpha",
+    "bravo",
+    "charlie",
+    "make setup",
+    "make test",
+    "make smoke",
+    "GitHub Actions",
+    "safe-to-serve eligibility",
+    "INCIDENT_NOTE.md",
     "AI_USAGE.md",
     "DEFENSE_NOTES.md",
-    "The assignment files have one job each",
 ]
 
 REQUIRED_INDEX_PHRASES = [
-    "Build the smallest local runtime-fleet slice",
-    "A submission is reviewable when every gate is green",
+    "Market Data Freshness",
     "Fresh checkout run path",
-    "Smoke command",
-    "Delivery automation path",
-    "Two operational failure scenarios",
-    "Release-safety scenario",
-    "Invite <code>kmshdev</code>",
+    "make setup",
+    "make test",
+    "make smoke",
+    "A submission is reviewable when every gate is green",
 ]
 
 
@@ -84,8 +78,8 @@ def check_forbidden_phrases() -> list[str]:
         text = read_text(relative_path)
         lowered = text.lower()
         for phrase in FORBIDDEN_PHRASES:
-            if phrase in lowered:
-                errors.append(f"{relative_path}: remove internal phrase: {phrase}")
+            if phrase.lower() in lowered:
+                errors.append(f"{relative_path}: remove retired phrase: {phrase}")
     return errors
 
 

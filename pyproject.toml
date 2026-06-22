@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sre-work-sample"
 version = "0.1.0"
-description = "Starter scaffold for the 2026 SRE work sample"
+description = "Starter scaffold for the market-data freshness SRE work sample"
 requires-python = ">=3.11"
 dependencies = []
 

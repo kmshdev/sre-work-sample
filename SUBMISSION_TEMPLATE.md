@@ -1,41 +1,16 @@
-# Candidate submission template
+# Candidate Submission Template
 
-Read the live assignment packet before filling this out:
-<https://kmshdev.github.io/sre-work-sample/>.
-
-You may use this template for your final report. Keep it concise and link to
-commands, logs, screenshots, dashboards, workflow runs, or files where they are
-clearer than prose.
+Use this template for `SUBMISSION.md`. Link to commands, logs, screenshots,
+workflow runs, or files when evidence is clearer than prose.
 
 ## 1. Summary
 
-State what you built in 5-8 sentences. Include the stack, the local runtime-fleet
-slice, the main reliability idea, and what a reviewer should run first.
+State what you changed in 5-8 sentences. Include the stack, freshness behavior,
+main reliability idea, and what a reviewer should run first.
 
-## 2. Architecture overview
+## 2. Fresh-checkout setup and run commands
 
-Describe:
-
-- Control surface.
-- Three simulated runtimes and their identities.
-- Mock dependency.
-- Pause or block operation.
-- State or configuration storage.
-- Observability path.
-
-Include a small diagram if it helps.
-
-## 3. Fresh-checkout setup and run commands
-
-Assume the reviewer has cloned the repository on a new machine with no prior
-local state. List exact commands and expected output or evidence.
-
-Fresh-checkout path:
-
-```sh
-git clone <repository-url>
-cd <repository-directory>
-```
+Assume the reviewer cloned the repository on a new machine.
 
 Prerequisites and supported versions:
 
@@ -46,133 +21,92 @@ Prerequisites and supported versions:
 Setup commands:
 
 ```sh
-<commands>
+make setup
 ```
 
-Start commands:
+Test command:
 
 ```sh
-<commands>
+make test
 ```
 
-Cleanup commands:
+Smoke command:
 
 ```sh
-<commands>
+make smoke
 ```
 
-If any local review path needs environment variables, fake data, or disposable
-resources, document them here.
-
-## 4. Smoke command and output
-
-Provide the smoke command that verifies the control surface, simulated runtimes,
-mock dependency, and at least one health-state response.
-
-Command:
-
-```sh
-<smoke command>
-```
-
-Expected output or captured output:
+Expected or captured output:
 
 ```text
 <output>
 ```
 
-## 5. Health model
+## 3. Health model
 
-Define only the states exercised by your implemented slice. Show how the model
-separates process liveness from operational eligibility.
+Show how the system separates process liveness from safe-to-serve eligibility.
 
-| State | Entry signal | Operator view | Allowed | Blocked | Alert or runbook | Exit |
-| --- | --- | --- | --- | --- | --- | --- |
-| healthy | | | | | | |
-| paused_by_operator | | | | | | |
-| <state> | | | | | | |
+| Feed | Alive signal | Freshness signal | Allowed actions | Blocked actions | Recovery path |
+| --- | --- | --- | --- | --- | --- |
+| alpha | | | | | |
+| bravo | | | | | |
+| charlie | | | | | |
+
+## 4. Stale-feed scenario
+
+Show the full scenario evidence:
+
+- Trigger command or action.
+- Detection signal.
+- State transition.
+- What becomes blocked.
+- What remains allowed.
+- Alert, ticket, annotation, or incident path.
+- Recovery command or action.
+- Evidence that proves recovery worked.
+
+## 5. GitHub Actions evidence
+
+Link to or paste evidence for the workflow that runs setup, tests, smoke, and
+candidate documentation validation.
 
 ## 6. Observability and alerting
 
 Document:
 
-- Health commands or endpoints.
-- Metrics or equivalent signals.
-- Structured or searchable logs.
-- Suggested SLIs and SLOs.
-- At least three alert rules with threshold, severity, owner, and action.
-- Evidence from a short run.
+- Freshness service-level indicator.
+- Liveness or availability service-level indicator.
+- Page-worthy stale-data alert.
+- Non-page warning or ticket threshold.
+- Structured logs, metrics, JSON output, or equivalent evidence from a short run.
 
-## 7. Implemented failure scenarios
+## 7. Bad configuration and rollback note
 
-Include two end-to-end implemented operational failure scenarios. One scenario
-must demonstrate release safety through a bad rollout or bad configuration.
+Describe one bad configuration or rollout-safety scenario. Include:
 
-For each scenario, include:
+- How detection works.
+- How blast radius stays limited.
+- Rollback command or decision.
+- Evidence that would prove rollback worked.
 
-- Trigger command or action.
-- Detection signal.
-- State transition.
-- What becomes blocked and what remains allowed.
-- Alert, ticket, annotation, or incident path.
-- Recovery command or action.
-- Evidence that proves the scenario worked.
+## 8. Incident note
 
-### Scenario 1: <name>
+Link to `INCIDENT_NOTE.md` or include the incident response here. Cover severity,
+first five checks, block/allow decision, notifications, operator-facing status,
+first runbook action, and closure evidence.
 
-### Scenario 2: <name>
-
-## 8. Planned future scenarios
-
-List scenarios you intentionally didn't implement. For each one, explain how
-you would implement and validate it with more time, plus the tradeoff that led
-you to defer it.
-
-## 9. Delivery automation evidence
-
-Link to or paste evidence for the repeatable delivery path. Include:
-
-- Automation entry point, such as workflow, Make target, Taskfile, or equivalent.
-- Setup and validation steps.
-- Smoke checks.
-- Promotion or deploy step.
-- Rollback or recovery thinking.
-- CI logs, local dry-run output, workflow output, or deployment transcript.
-
-## 10. Deployment, rollout, and recovery notes
-
-Explain how the local slice would grow to 20-50 runtimes:
-
-- Runtime identity and isolation strategy.
-- Configuration and secret-management assumptions.
-- Rollout rings, canary, or promotion strategy.
-- Rollback criteria and recovery steps.
-- Backup or state-recovery approach where relevant.
-- What Kubernetes, Terraform, Helm, GitOps, or cloud services would add, if you
-  would use them.
-- Why you did or didn't use those tools in the local work sample.
-
-## 11. Security and operator controls
+## 9. Security and operator controls
 
 Describe:
 
-- Authentication and authorization assumptions.
 - Actions that need audit logs.
-- Actions that need confirmation or two-person review.
-- Secret and external account identifier handling.
+- Actions that need confirmation or review.
+- Secret and external account handling assumptions.
 - Operations that should never be allowed from an unaudited client.
 
-## 12. No-agent incident declaration
+## 10. AI usage
 
-Link to `NO_AGENT_INCIDENT.md`.
-
-Confirm that the file was completed without coding agents or LLMs. Summarize the
-severity, first five checks, blocked or allowed actions, notifications,
-operator-facing status message, first runbook action, and closure evidence.
-
-## 13. AI usage
-
-Link to `AI_USAGE.md`, or state that you didn't use AI tools.
+Link to `AI_USAGE.md`, or state that you did not use AI tools.
 
 If you used AI tools, include:
 
@@ -182,20 +116,8 @@ If you used AI tools, include:
 - One wrong or incomplete generated result and how you caught it.
 - Verification you ran yourself.
 
-## 14. Tradeoffs and omissions
+## 11. Tradeoffs and follow-up defense
 
-List what you intentionally didn't build and why. Include the next changes you
-would make with more time.
-
-## 15. Follow-up defense notes
-
-Link to `DEFENSE_NOTES.md`.
-
-Confirm that it includes:
-
-- Three design decisions you expect to defend.
-- One thing you would redesign with more time.
-- One generated mistake you caught, or a statement that you didn't use AI tools.
-- One unresolved production risk.
-- The strongest evidence artifact in your submission.
-- The most important questions you would ask before productionizing the platform.
+List what you intentionally did not build and why. Include the next changes you
+would make with more time and the production risks you would discuss in the
+follow-up interview.
