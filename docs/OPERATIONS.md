@@ -5,3 +5,17 @@ procedures.
 
 Keep commands concrete enough that a reviewer can run them from a fresh
 checkout.
+
+## Fresh-Checkout Commands
+
+List setup, start, smoke, and cleanup commands with expected output.
+
+## Failure Scenarios
+
+For each implemented scenario, include the trigger, detection signal, blocked
+action, recovery step, and evidence location.
+
+## Alerts and Operator Actions
+
+For each alert, include threshold, severity, owner, and first action. Avoid
+alerts that tell an operator something is wrong without telling them what to do.

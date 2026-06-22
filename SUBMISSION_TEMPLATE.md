@@ -1,5 +1,8 @@
 # Candidate Submission Template
 
+Read the live assignment packet before filling this out:
+<https://kmshdev.github.io/sre-work-sample/>.
+
 You may use this template for your final report. Keep it concise and link to
 commands, logs, screenshots, dashboards, workflow runs, or files where they are
 clearer than prose.

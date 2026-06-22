@@ -1,8 +1,9 @@
 # Architecture Notes
 
-Replace this starter note with the architecture you actually built.
+Replace this starter note with the architecture you actually built. Keep the
+section useful for a reviewer who is deciding what to run first.
 
-At minimum, describe:
+## System Shape
 
 - Control surface.
 - Three simulated runtimes and their identities.
@@ -10,3 +11,13 @@ At minimum, describe:
 - Pause or block operation.
 - State or configuration storage.
 - Observability path.
+
+## Runtime Boundaries
+
+Describe what makes one runtime distinct from another. Include identity,
+configuration, dependency boundary, and health-state ownership.
+
+## Design Tradeoffs
+
+List the important choices you made and why. Separate implemented behavior from
+future production work.

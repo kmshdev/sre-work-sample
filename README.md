@@ -1,12 +1,19 @@
 # 2026 SRE Take-Home: Critical Runtime Operations Platform
 
-Open [`index.html`](index.html) as the browser entry point for this assignment
-packet. This README remains the authoritative assignment specification. Use
-[`CANDIDATE_RUNBOOK.html`](CANDIDATE_RUNBOOK.html) as a pacing guide,
-[`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) for health-state guidance,
-[`EVIDENCE_AND_VALIDATION_GUIDE.html`](EVIDENCE_AND_VALIDATION_GUIDE.html) for
-proof expectations, and [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md) for
-your final report.
+Open the live assignment packet first:
+<https://kmshdev.github.io/sre-work-sample/>.
+
+This repository is both the candidate assignment packet and the runnable starter
+scaffold. This README remains the authoritative assignment specification. The
+HTML pages are the browser-friendly guide:
+
+- [`index.html`](index.html) summarizes the task, requirements, timeline, and
+  submission route.
+- [`CANDIDATE_RUNBOOK.html`](CANDIDATE_RUNBOOK.html) gives a pacing guide.
+- [`HEALTH_MODEL_GUIDE.html`](HEALTH_MODEL_GUIDE.html) explains health states.
+- [`EVIDENCE_AND_VALIDATION_GUIDE.html`](EVIDENCE_AND_VALIDATION_GUIDE.html)
+  explains proof expectations.
+- [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md) is the final report shape.
 
 This take-home is a senior SRE work sample over 7 calendar days for someone who
 would help operate a small but critical runtime fleet. We do not expect production

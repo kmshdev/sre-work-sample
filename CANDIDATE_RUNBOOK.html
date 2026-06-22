@@ -1,886 +1,190 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Candidate Runbook - 2026 SRE Take-Home</title>
-<script>
-  (function () {
-    var stored = localStorage.getItem("theme");
-    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (stored === "dark" || (!stored && prefersDark)) {
-      document.documentElement.classList.add("dark");
-    }
-  })();
-</script>
+<link rel="icon" href="data:,">
+<title>Candidate Runbook - SRE Work Sample</title>
 <style>
-  :root {
-    --ivory: #faf9f5;
-    --slate: #141413;
-    --clay: #d97757;
-    --oat: #e3dacc;
-    --olive: #788c5d;
-    --rust: #b04a3f;
-    --gray-100: #f0eee6;
-    --gray-300: #d1cfc5;
-    --gray-500: #87867f;
-    --gray-700: #3d3d3a;
-    --white: #ffffff;
-    --panel: #ffffff;
-    --shadow: rgba(20, 20, 19, 0.06);
-    --serif: ui-serif, Georgia, "Times New Roman", serif;
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --border: 1.5px solid var(--gray-300);
-  }
-
-  html.dark {
-    --ivory: #171715;
-    --slate: #faf9f5;
-    --clay: #e58a69;
-    --oat: #4a4338;
-    --olive: #9aae78;
-    --rust: #dc6b61;
-    --gray-100: #24231f;
-    --gray-300: #45433b;
-    --gray-500: #aaa69a;
-    --gray-700: #d8d3c6;
-    --white: #20201d;
-    --panel: #20201d;
-    --shadow: rgba(0, 0, 0, 0.28);
-  }
-
   * { box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    margin: 0;
-    padding: 56px 24px 120px;
-    background: var(--ivory);
-    color: var(--gray-700);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
+  :root {
+    --bg: #fbf8f0;
+    --panel: #fffdf8;
+    --ink: #171a18;
+    --muted: #58635d;
+    --line: #d0c7b9;
+    --accent: #b75135;
+    --soft: #eee7da;
+    font-family: Athelas, Charter, Georgia, serif;
+    color: var(--ink);
+    background: var(--bg);
     -webkit-font-smoothing: antialiased;
   }
-
-  .page {
-    max-width: 1120px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 46px;
-  }
-
-  nav {
-    position: sticky;
-    top: 28px;
-    align-self: start;
-    font-size: 13px;
-  }
-
-  nav .label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gray-500);
-    margin-bottom: 12px;
-  }
-
-  nav a {
-    display: block;
-    padding: 6px 0 6px 12px;
-    border-left: 2px solid var(--gray-300);
-    color: var(--gray-700);
-    text-decoration: none;
-  }
-
-  nav a:hover {
-    color: var(--slate);
-    border-color: var(--clay);
-  }
-
-  main { min-width: 0; }
-
-  header {
-    margin-bottom: 34px;
-    max-width: 860px;
-  }
-
-  .topline {
+  body { margin: 0; padding: 28px 0 56px; background: var(--bg); }
+  a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+  a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .page { width: min(1040px, calc(100vw - 28px)); margin: 0 auto; }
+  .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 22px;
   }
-
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--gray-500);
+  .brand, .nav, .eyebrow, code, th {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: .78rem;
   }
-
-  .theme-toggle {
-    appearance: none;
-    border: var(--border);
-    border-radius: 999px;
-    background: var(--panel);
-    color: var(--slate);
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 7px 11px;
-  }
-
-  h1 {
-    margin: 0 0 16px;
-    color: var(--slate);
-    font-family: var(--serif);
-    font-size: 40px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    line-height: 1.12;
-  }
-
-  .lede {
-    color: var(--gray-700);
-    font-size: 16px;
-    max-width: 760px;
-    margin: 0;
-  }
-
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin: 34px 0 54px;
-  }
-
-  .summary .cell,
-  .panel,
-  .callout,
-  table {
-    background: var(--panel);
-    border: var(--border);
-    border-radius: 12px;
-    box-shadow: 0 12px 32px var(--shadow);
-  }
-
-  .summary .cell {
-    padding: 18px 20px;
-  }
-
-  .k {
-    color: var(--gray-500);
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .v {
-    color: var(--slate);
-    font-size: 17px;
-    font-weight: 650;
-    margin-top: 6px;
-  }
-
-  section {
-    margin-bottom: 58px;
-    scroll-margin-top: 24px;
-  }
-
-  .sec-head {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-
-  .num {
-    background: var(--oat);
-    border-radius: 7px;
-    color: var(--slate);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 3px 9px;
-  }
-
-  h2 {
-    color: var(--slate);
-    font-family: var(--serif);
-    font-size: 26px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    margin: 0;
-  }
-
-  .sec-intro {
-    color: var(--gray-500);
-    margin: 0 0 22px;
-    max-width: 720px;
-  }
-
-  .timeline {
-    display: grid;
-    gap: 0;
-  }
-
-  .day {
-    display: grid;
-    grid-template-columns: 92px 28px 1fr;
-    gap: 0 18px;
-  }
-
-  .day .when {
-    color: var(--gray-500);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding-top: 4px;
-    text-align: right;
-  }
-
-  .rail {
-    display: flex;
+  .brand { font-weight: 800; text-decoration: none; }
+  .nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nav a {
+    min-height: 40px;
+    display: inline-flex;
     align-items: center;
-    flex-direction: column;
-  }
-
-  .dot {
     background: var(--panel);
-    border: 3px solid var(--clay);
-    border-radius: 50%;
-    height: 14px;
-    margin-top: 5px;
-    width: 14px;
-  }
-
-  .line {
-    background: var(--gray-300);
-    flex: 1;
-    margin: 4px 0;
-    width: 2px;
-  }
-
-  .day:last-child .line { display: none; }
-
-  .day .body {
-    padding-bottom: 32px;
-  }
-
-  h3 {
-    color: var(--slate);
-    font-family: var(--serif);
-    font-size: 19px;
-    font-weight: 500;
-    margin: 0 0 5px;
-  }
-
-  p {
-    margin: 0 0 12px;
-    max-width: 760px;
-  }
-
-  code {
-    background: var(--gray-100);
-    border-radius: 4px;
-    color: var(--slate);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 1px 5px;
-  }
-
-  a {
-    color: var(--clay);
+    box-shadow: 0 0 0 1px var(--line);
+    padding: 0 12px;
     text-decoration: none;
-    border-bottom: 1px dotted var(--clay);
   }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  .hero, .card, table {
+    background: var(--panel);
+    box-shadow: 0 0 0 1px var(--ink), 7px 7px 0 var(--ink);
   }
-
-  .tag {
-    background: var(--gray-100);
-    border: 1px solid var(--gray-300);
-    border-radius: 6px;
-    color: var(--gray-700);
-    font-family: var(--mono);
-    font-size: 11.5px;
-    padding: 3px 8px;
-  }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-  }
-
-  .panel {
-    padding: 20px 22px;
-  }
-
-  .panel h3 {
-    margin-bottom: 12px;
-  }
-
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  li {
-    margin: 0 0 10px;
-    padding-left: 24px;
-    position: relative;
-  }
-
-  li::before {
-    background: var(--clay);
-    border-radius: 2px;
-    content: "";
-    height: 7px;
-    left: 4px;
-    position: absolute;
-    top: 9px;
-    width: 7px;
-  }
-
-  .avoid li::before { background: var(--rust); }
-  .do li::before { background: var(--olive); }
-
-  table {
-    border-collapse: separate;
-    border-spacing: 0;
-    overflow: hidden;
-    width: 100%;
-  }
-
-  th {
-    background: var(--gray-100);
-    border-bottom: 1px solid var(--gray-300);
-    color: var(--gray-500);
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    padding: 12px 14px;
-    text-align: left;
-    text-transform: uppercase;
-  }
-
-  td {
-    border-bottom: 1px solid var(--gray-100);
+  .hero, .card { padding: clamp(20px, 4vw, 34px); }
+  .eyebrow { margin: 0 0 12px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+  h1, h2, h3, p { margin-top: 0; }
+  h1 { max-width: 14ch; font-size: clamp(3rem, 8vw, 6rem); line-height: .92; text-wrap: balance; }
+  h2 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1; text-wrap: balance; }
+  h3 { font-size: 1.15rem; line-height: 1.2; }
+  p, li { color: var(--muted); font-size: 1rem; line-height: 1.65; text-wrap: pretty; }
+  .section { margin-top: 30px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .step { background: var(--panel); box-shadow: 0 0 0 1px var(--line); padding: 18px; }
+  pre { overflow-x: auto; background: var(--ink); color: var(--panel); padding: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
     padding: 13px 14px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
     vertical-align: top;
   }
-
-  tr:last-child td { border-bottom: none; }
-
-  .callout {
-    border-left: 4px solid var(--clay);
-    margin: 18px 0;
-    padding: 16px 18px;
-  }
-
-  .callout strong {
-    color: var(--slate);
-  }
-
-  .rubric {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
-
-  .rubric .panel {
-    border-top: 4px solid var(--clay);
-    padding-top: 16px;
-  }
-
-  footer {
-    border-top: 1px solid var(--gray-300);
-    color: var(--gray-500);
-    font-size: 13px;
-    margin-top: 60px;
-    padding-top: 18px;
-  }
-
-  @media (max-width: 940px) {
-    .page { display: block; }
-    nav { display: none; }
-    .summary,
-    .grid-2,
-    .rubric { grid-template-columns: 1fr; }
-    body { padding: 36px 18px 80px; }
-    h1 { font-size: 34px; }
-    .day { grid-template-columns: 1fr; }
-    .day .when { text-align: left; margin-bottom: 8px; }
-    .rail { display: none; }
+  th { color: var(--muted); text-transform: uppercase; }
+  tr:last-child td { border-bottom: 0; }
+  footer { margin-top: 34px; color: var(--muted); }
+  @media (max-width: 820px) {
+    .topbar { align-items: stretch; flex-direction: column; }
+    .grid { grid-template-columns: 1fr; }
+    h1 { max-width: none; }
   }
 </style>
 </head>
 <body>
 <div class="page">
-  <nav aria-label="Runbook sections">
-    <div class="label">Runbook</div>
-    <a href="#start">Start Here</a>
-    <a href="#guides">Companion Guides</a>
-    <a href="#schedule">7 Day Plan</a>
-    <a href="#filter">Pass The Filter</a>
-    <a href="#do-avoid">Do / Avoid</a>
-    <a href="#deliverables">Deliverables</a>
-    <a href="#evidence">Evidence</a>
-    <a href="#no-agent">No-Agent Incident</a>
-    <a href="#rubric">Self-Review</a>
-  </nav>
+  <header class="topbar">
+    <a class="brand" href="index.html">Critical Runtime Operations Platform</a>
+    <nav class="nav" aria-label="Assignment pages">
+      <a href="index.html">Overview</a>
+      <a href="HEALTH_MODEL_GUIDE.html">Health model</a>
+      <a href="EVIDENCE_AND_VALIDATION_GUIDE.html">Evidence</a>
+      <a href="SUBMISSION_TEMPLATE.md">Template</a>
+    </nav>
+  </header>
 
   <main>
-    <header id="start">
-      <div class="topline">
-        <div class="eyebrow">Candidate Runbook</div>
-        <button class="theme-toggle" type="button" id="themeToggle">Toggle theme</button>
-      </div>
-      <h1>How to complete the 2026 SRE take-home without overbuilding it</h1>
-      <p class="lede">
-        This runbook is a companion to the assignment README. The README is authoritative.
-        Use this page to pace the work, keep evidence tight, and make your operational
-        judgment easy for reviewers to inspect.
+    <section class="hero">
+      <p class="eyebrow">Candidate runbook</p>
+      <h1>Make the first proof runnable early.</h1>
+      <p>
+        Use the starter scaffold to get a fresh-checkout path working first.
+        Then replace the sample fleet with the smallest implementation that
+        proves your SRE operating model.
       </p>
-    </header>
-
-    <div class="summary" aria-label="Assignment summary">
-      <div class="cell">
-        <div class="k">Window</div>
-        <div class="v">7 calendar days</div>
-      </div>
-      <div class="cell">
-        <div class="k">Scope</div>
-        <div class="v">Minimal local slice</div>
-      </div>
-      <div class="cell">
-        <div class="k">Goal</div>
-        <div class="v">Operable platform slice</div>
-      </div>
-      <div class="cell">
-        <div class="k">Reviewer lens</div>
-        <div class="v">Reliability judgment</div>
-      </div>
-    </div>
-
-    <section id="guides">
-      <div class="sec-head"><span class="num">00</span><h2>Companion Guides</h2></div>
-      <p class="sec-intro">
-        Use these guardrail guides when you need orientation, not answers. They explain what
-        reviewers expect without prescribing your architecture or stack.
-      </p>
-      <div class="grid-2">
-        <div class="panel">
-          <div class="k">Design guardrails</div>
-          <h3><a href="HEALTH_MODEL_GUIDE.html">Health model guide</a></h3>
-          <p>How to separate process health from operational eligibility and blocked actions.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Proof checklist</div>
-          <h3><a href="EVIDENCE_AND_VALIDATION_GUIDE.html">Evidence guide</a></h3>
-          <p>What command output, logs, screenshots, alerts, and recovery evidence should show.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Final report</div>
-          <h3><a href="SUBMISSION_TEMPLATE.md">Submission template</a></h3>
-          <p>A concise report structure for architecture, validation, tradeoffs, and AI usage.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Defense prep</div>
-          <h3><code>DEFENSE_NOTES.md</code></h3>
-          <p>
-            Required notes on decisions, redesigns, AI mistakes, production risk, and best
-            evidence.
-          </p>
-        </div>
-      </div>
     </section>
 
-    <section id="schedule">
-      <div class="sec-head"><span class="num">01</span><h2>7 Day Execution Plan</h2></div>
-      <p class="sec-intro">
-        Keep the implementation small enough that health states, alerts, recovery, and
-        documentation stay coherent. Build the smallest local runtime-fleet slice that proves
-        your operational model, then write down tradeoffs before expanding scope.
+    <section class="section card" aria-labelledby="start-title">
+      <p class="eyebrow">Start here</p>
+      <h2 id="start-title">Run the starter before changing it.</h2>
+      <pre><code>make setup
+make test
+make smoke
+make run</code></pre>
+      <p>
+        Keep these commands working or replace them with equivalent commands.
+        The reviewer must be able to clone, set up, run, smoke, and clean up
+        from a machine with no prior local state.
       </p>
+    </section>
 
-      <div class="timeline">
-        <article class="day">
-          <div class="when">Day 1</div>
-          <div class="rail"><span class="dot"></span><span class="line"></span></div>
-          <div class="body">
-            <h3>Scope the platform and define health</h3>
-            <p>
-              Pick a stack, sketch the control service, three runtimes, one mock dependency,
-              and the operator surface. Define runtime identity and the health-state table
-              before writing much code.
-            </p>
-            <div class="tags">
-              <span class="tag">architecture</span>
-              <span class="tag">runtime identity</span>
-              <span class="tag">health states</span>
-            </div>
-          </div>
+    <section class="section card" aria-labelledby="week-title">
+      <p class="eyebrow">Suggested 7-day path</p>
+      <h2 id="week-title">Reduce review risk in this order.</h2>
+      <div class="grid">
+        <article class="step">
+          <h3>Day 1: Fresh checkout</h3>
+          <p>Make setup, tests, smoke, and cleanup repeatable.</p>
         </article>
-
-        <article class="day">
-          <div class="when">Day 2</div>
-          <div class="rail"><span class="dot"></span><span class="line"></span></div>
-          <div class="body">
-            <h3>Add observability and failure injection</h3>
-            <p>
-              Expose health and metrics, add searchable logs, define at least three alert
-              rules, and start proving two operational failures plus release safety.
-            </p>
-            <div class="tags">
-              <span class="tag">metrics</span>
-              <span class="tag">alerts</span>
-              <span class="tag">failure injection</span>
-            </div>
-          </div>
+        <article class="step">
+          <h3>Days 2-3: Runtime model</h3>
+          <p>Add three runtimes, one dependency, and one safety control.</p>
         </article>
-
-        <article class="day">
-          <div class="when">Day 3</div>
-          <div class="rail"><span class="dot"></span><span class="line"></span></div>
-          <div class="body">
-            <h3>Write runbooks and collect evidence</h3>
-            <p>
-              Document deployment, rollout, rollback, operator controls, security assumptions,
-              and recovery paths. Complete <code>NO_AGENT_INCIDENT.md</code> without coding
-              agents or LLMs.
-            </p>
-            <div class="tags">
-              <span class="tag">runbooks</span>
-              <span class="tag">security</span>
-              <span class="tag">evidence</span>
-            </div>
-          </div>
+        <article class="step">
+          <h3>Days 4-5: Failure evidence</h3>
+          <p>Implement two scenarios with detection, blocking, and recovery.</p>
         </article>
-
-        <article class="day">
-          <div class="when">Days 4-7</div>
-          <div class="rail"><span class="dot"></span><span class="line"></span></div>
-          <div class="body">
-            <h3>Simplify, validate, and prepare the report</h3>
-            <p>
-              Tighten anything that became too broad. Ensure a reviewer can run the project
-              from a fresh checkout and understand what is implemented, simulated, or omitted.
-            </p>
-            <div class="tags">
-              <span class="tag">validation</span>
-              <span class="tag">submission report</span>
-              <span class="tag">tradeoffs</span>
-            </div>
-          </div>
+        <article class="step">
+          <h3>Day 6: Automation</h3>
+          <p>Wire validation, smoke, promotion thinking, and rollback notes.</p>
+        </article>
+        <article class="step">
+          <h3>Day 7: Submission</h3>
+          <p>Write the report, no-agent incident, AI usage, and defense notes.</p>
+        </article>
+        <article class="step">
+          <h3>Always: Cut scope</h3>
+          <p>Prefer a small system with strong evidence over a broad demo.</p>
         </article>
       </div>
     </section>
 
-    <section id="filter">
-      <div class="sec-head"><span class="num">02</span><h2>Pass The Filter</h2></div>
-      <p class="sec-intro">
-        This take-home decides whether we should spend interview time with you. It is not a
-        final hiring decision, and it is not scored by feature count.
-      </p>
-      <div class="grid-2">
-        <div class="panel do">
-          <h3>Hard gates</h3>
-          <ul>
-            <li>Your submission runs from a fresh checkout with exact setup and smoke commands.</li>
-            <li>
-              Your delivery automation evidence shows validation, promotion, and rollback intent.
-            </li>
-            <li>Your health model separates liveness from operational eligibility.</li>
-            <li>
-              Two operational failures include trigger, detection, state change, alert path,
-              and recovery.
-            </li>
-            <li>
-              Your release-safety scenario is implemented or documented with validation and
-              rollback intent.
-            </li>
-            <li>Your <code>NO_AGENT_INCIDENT.md</code> is credible and clearly no-agent work.</li>
-            <li>
-              Your solution respects the no real systems, no secrets, and no paid-review
-              constraints.
-            </li>
-          </ul>
-        </div>
-        <div class="panel avoid">
-          <h3>Usually fails</h3>
-          <ul>
-            <li>Treating <code>/healthz == 200</code> as the health model.</li>
-            <li>Submitting alerts without thresholds, severity, owner, or action.</li>
-            <li>Using restart-only recovery as the whole incident response.</li>
-            <li>Providing broad AI-generated prose without specific evidence.</li>
-            <li>
-              Missing <code>DEFENSE_NOTES.md</code>, <code>NO_AGENT_INCIDENT.md</code>, or
-              AI usage disclosure.
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section id="do-avoid">
-      <div class="sec-head"><span class="num">03</span><h2>Do / Avoid</h2></div>
-      <p class="sec-intro">
-        The assignment is not scored by feature count. It is scored by whether your design
-        would be understandable and safe to operate under partial failure.
-      </p>
-
-      <div class="grid-2">
-        <div class="panel do">
-          <h3>Do</h3>
-          <ul>
-            <li>Prove clear health states and what each state allows or blocks.</li>
-            <li>Show alerts that are actionable, with page versus ticket severity.</li>
-            <li>Include exact run commands and a short smoke-test path.</li>
-            <li>Demonstrate two operational failure scenarios with real evidence.</li>
-            <li>Separate implemented evidence from planned-but-not-implemented scenarios.</li>
-          </ul>
-        </div>
-        <div class="panel avoid">
-          <h3>Avoid</h3>
-          <ul>
-            <li>Do not connect to real brokers, exchanges, customer systems, or secrets.</li>
-            <li>Do not require paid infrastructure for review.</li>
-            <li>Do not treat restart-only behavior as a complete recovery model.</li>
-            <li>Do not spend most of the time on UI polish while observability is thin.</li>
-            <li>Do not hide AI-generated work; document how you verified it.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section id="deliverables">
-      <div class="sec-head"><span class="num">04</span><h2>Deliverables Checklist</h2></div>
-      <p class="sec-intro">
-        Use this as a final pass before submission. Every item should be easy to find from
-        your README or submission report.
-      </p>
-
+    <section class="section card" aria-labelledby="deliver-title">
+      <p class="eyebrow">Deliverables</p>
+      <h2 id="deliver-title">Every deliverable should answer a reviewer question.</h2>
       <table>
         <thead>
           <tr>
-            <th>Deliverable</th>
-            <th>Minimum evidence</th>
-            <th>Reviewer question it answers</th>
+            <th scope="col">Deliverable</th>
+            <th scope="col">Question it answers</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Runtime platform slice</td>
-            <td>
-              Control service, three runtimes or simulation path, mock dependency, operator
-              view.
-            </td>
-            <td>Can this candidate shape an operable system slice?</td>
+            <td>Fresh-checkout commands</td>
+            <td>Can a reviewer run the system without hidden local state?</td>
           </tr>
           <tr>
-            <td>Health model</td>
-            <td>State table with entry signals, allowed actions, alert route, and runbook.</td>
-            <td>Do they separate process health from operational eligibility?</td>
+            <td>Smoke command</td>
+            <td>Does the control surface, runtimes, dependency, and health work?</td>
           </tr>
           <tr>
-            <td>Observability</td>
-            <td>
-              Health checks, metrics, logs, alert rules, SLO or SLI notes, short-run evidence.
-            </td>
-            <td>Would an operator know what is happening?</td>
+            <td>Failure scenarios</td>
+            <td>Can the system fail visibly and recover through operator steps?</td>
           </tr>
           <tr>
-            <td>Failure injection</td>
-            <td>Two implemented operational failures plus release-safety evidence or plan.</td>
-            <td>Have failure modes been tested instead of only described?</td>
-          </tr>
-          <tr>
-            <td>Deployment and rollout</td>
-            <td>
-              Delivery automation, identity and isolation, secret approach, rings, rollback
-              criteria.
-            </td>
-            <td>Can this scale to 20-50 runtimes without overengineering?</td>
-          </tr>
-          <tr>
-            <td>Security and controls</td>
-            <td>
-              Auth assumptions, audit model, dangerous actions, confirmation rules, secret
-              handling.
-            </td>
-            <td>Do privileged operations have boundaries?</td>
-          </tr>
-          <tr>
-            <td>No-agent incident</td>
-            <td><code>NO_AGENT_INCIDENT.md</code> completed without coding agents or LLMs.</td>
-            <td>How does the candidate reason without generation tools?</td>
-          </tr>
-          <tr>
-            <td>AI usage and report</td>
-            <td><code>AI_USAGE.md</code> if used, plus concise submission report or template.</td>
-            <td>Can they communicate process, validation, and judgment?</td>
+            <td>Delivery automation</td>
+            <td>Can validation and release safety be repeated?</td>
           </tr>
           <tr>
             <td>Defense notes</td>
-            <td>
-              <code>DEFENSE_NOTES.md</code> with decisions, redesign, AI mistake, risk, and
-              best evidence.
-            </td>
-            <td>Can they identify what they own and what remains risky?</td>
+            <td>Can you explain tradeoffs and production risks live?</td>
           </tr>
         </tbody>
       </table>
     </section>
-
-    <section id="evidence">
-      <div class="sec-head"><span class="num">05</span><h2>Evidence to Capture</h2></div>
-      <p class="sec-intro">
-        Evidence beats claims. Prefer small, inspectable artifacts that a reviewer can rerun
-        locally or understand quickly in a follow-up interview.
-      </p>
-
-      <div class="grid-2">
-        <div class="panel">
-          <h3>Run evidence</h3>
-          <ul>
-            <li>Fresh checkout setup commands and expected output.</li>
-            <li>
-              Smoke-test command that proves the control surface, runtimes, mock dependency,
-              and health response.
-            </li>
-            <li>
-              Delivery automation evidence such as workflow output, local dry run, or
-              transcript.
-            </li>
-            <li>Health endpoint or CLI output for states exercised by your implemented slice.</li>
-            <li>Metrics scrape, dashboard export, or representative metric samples.</li>
-          </ul>
-        </div>
-        <div class="panel">
-          <h3>Failure evidence</h3>
-          <ul>
-            <li>Command or switch used to trigger each required failure.</li>
-            <li>Log excerpt showing detection and state transition.</li>
-            <li>Alert rule or monitor definition with expected severity.</li>
-            <li>Recovery command and proof that the system returned to the intended state.</li>
-            <li>Clear labels for implemented scenarios versus documented-only plans.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="callout">
-        <strong>Keep screenshots useful.</strong> A screenshot should show state, timestamps,
-        runtime identity, and what action is blocked or allowed. A pretty chart without
-        operational context is weak evidence.
-      </div>
-    </section>
-
-    <section id="no-agent">
-      <div class="sec-head"><span class="num">06</span><h2>No-Agent Incident Segment</h2></div>
-      <p class="sec-intro">
-        Complete <code>NO_AGENT_INCIDENT.md</code> without coding agents or LLMs. Normal
-        documentation, shell tools, and your own notes are allowed.
-      </p>
-
-      <div class="panel">
-        <h3>What strong answers include</h3>
-        <ul>
-          <li>
-            First five checks that distinguish control-surface reachability from data
-            freshness failure.
-          </li>
-          <li>Severity choice with a clear reason and initial blast-radius estimate.</li>
-          <li>Explicit decision about pausing affected runtimes or blocking unsafe actions.</li>
-          <li>Who gets paged or notified and what operators should be told.</li>
-          <li>First runbook action and the evidence needed to close or downgrade.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="rubric">
-      <div class="sec-head"><span class="num">07</span><h2>Self-Review Rubric</h2></div>
-      <p class="sec-intro">
-        Before submitting, read your own repo as if you were the on-call engineer receiving it
-        during an incident.
-      </p>
-
-      <div class="rubric">
-        <div class="panel">
-          <div class="k">Reliability</div>
-          <h3>Judgment under ambiguity</h3>
-          <p>
-            Tradeoffs are explicit, scope is controlled, and unsafe or unknown states fail
-            closed.
-          </p>
-        </div>
-        <div class="panel">
-          <div class="k">Health</div>
-          <h3>State correctness</h3>
-          <p>
-            Each state has entry signals, allowed actions, alert behavior, and recovery
-            guidance.
-          </p>
-        </div>
-        <div class="panel">
-          <div class="k">Observability</div>
-          <h3>Actionable signals</h3>
-          <p>Metrics, logs, health checks, and alerts explain both impact and next action.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Operations</div>
-          <h3>Runbook clarity</h3>
-          <p>A reviewer can start, break, inspect, and recover the system from documented steps.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Deployment</div>
-          <h3>20-50 runtime realism</h3>
-          <p>Isolation, identity, secrets, rollout rings, and rollback criteria are practical.</p>
-        </div>
-        <div class="panel">
-          <div class="k">Tooling</div>
-          <h3>AI transparency</h3>
-          <p>Agentic tool usage is disclosed, verified, and balanced by no-agent reasoning.</p>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      Companion runbook for the 2026 SRE Take-Home. The assignment README remains authoritative.
-    </footer>
   </main>
-</div>
 
-<script>
-  (function () {
-    var button = document.getElementById("themeToggle");
-    function updateLabel() {
-      button.textContent = document.documentElement.classList.contains("dark")
-        ? "Light mode"
-        : "Dark mode";
-    }
-    button.addEventListener("click", function () {
-      document.documentElement.classList.toggle("dark");
-      localStorage.setItem(
-        "theme",
-        document.documentElement.classList.contains("dark") ? "dark" : "light"
-      );
-      updateLabel();
-    });
-    updateLabel();
-  })();
-</script>
+  <footer>
+    README.md remains the authoritative assignment specification.
+  </footer>
+</div>
 </body>
 </html>
