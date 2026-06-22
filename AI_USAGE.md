@@ -2,7 +2,7 @@
 
 Use this file to show how you supervised any AI-assisted work.
 
-If you did not use AI coding tools, write that clearly and keep the rest of the
+If you didn't use AI coding tools, write that clearly and keep the rest of the
 file short.
 
 If you did, include:

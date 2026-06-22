@@ -87,7 +87,7 @@ Your implementation must include:
 - Two operational failure scenarios implemented end to end.
 - One bad rollout or bad configuration scenario tied to release safety.
 
-Use fake data and local services. Do not connect to real customer, production
+Use fake data and local services. Don't connect to real customer, production
 account, payment, or secret-bearing systems.
 
 ## The hard gates must pass before review
@@ -112,7 +112,7 @@ data file, document it before the command.
 
 ## The health model must fail closed
 
-A running process is not always safe to operate.
+A running process isn't always safe to operate.
 
 Separate two questions:
 
@@ -208,7 +208,7 @@ Your report must include:
 - Release-safety scenario evidence.
 - Delivery automation evidence.
 - Security and operator-control assumptions.
-- What you intentionally did not build.
+- What you intentionally didn't build.
 - What you would do next with more time.
 - Links to `AI_USAGE.md`, `NO_AGENT_INCIDENT.md`, and `DEFENSE_NOTES.md`.
 
@@ -216,13 +216,13 @@ Your report must include:
 
 Follow these constraints:
 
-- Do not include real secrets.
-- Do not require paid infrastructure.
-- Do not depend on real external accounts.
-- Do not hide failure behind restart-only recovery.
-- Do not make the assignment depend on one vendor unless the reason is clear.
-- Do not add broad production scope that your evidence does not exercise.
-- Do not spend time on visual polish at the cost of operational evidence.
+- Don't include real secrets.
+- Don't require paid infrastructure.
+- Don't depend on real external accounts.
+- Don't hide failure behind restart-only recovery.
+- Don't make the assignment depend on one vendor unless the reason is clear.
+- Don't add broad production scope that your evidence doesn't exercise.
+- Don't spend time on visual polish at the cost of operational evidence.
 
 ## AI tool use must be disclosed and verified
 
@@ -237,7 +237,7 @@ If you use AI tools, complete `AI_USAGE.md` with:
 - How you caught the problem.
 - Verification you ran yourself.
 
-If you do not use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
+If you don't use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
 
 ## The no-agent incident answer must be written by you
 
@@ -252,7 +252,7 @@ Expect questions about:
 
 - Why you chose your stack.
 - How your health model blocks unsafe work.
-- What your alerts page on and what they deliberately do not page on.
+- What your alerts page on and what they deliberately don't page on.
 - How your delivery path supports validation, promotion, and rollback.
 - How the local slice would grow to 20-50 runtimes.
 - How you used or avoided AI tools.

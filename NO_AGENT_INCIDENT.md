@@ -1,4 +1,4 @@
-# No-Agent Incident Segment
+# No-agent incident segment
 
 Complete this file without coding agents or LLMs.
 
@@ -8,7 +8,7 @@ incident when the process is running but operating data may be stale.
 Prompt:
 
 > At 09:37, the operator surface is reachable and API latency is normal, but
-> charts have not updated for 11 minutes for 9 of 50 runtimes. Runtime processes
+> charts haven't updated for 11 minutes for 9 of 50 runtimes. Runtime processes
 > are still running. Operators ask whether they should pause affected runtimes.
 > What do you do in the first 30 minutes?
 

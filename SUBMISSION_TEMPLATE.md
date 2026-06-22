@@ -1,4 +1,4 @@
-# Candidate Submission Template
+# Candidate submission template
 
 Read the live assignment packet before filling this out:
 <https://kmshdev.github.io/sre-work-sample/>.
@@ -124,7 +124,7 @@ For each scenario, include:
 
 ## 8. Planned future scenarios
 
-List scenarios you intentionally did not implement. For each one, explain how
+List scenarios you intentionally didn't implement. For each one, explain how
 you would implement and validate it with more time, plus the tradeoff that led
 you to defer it.
 
@@ -150,7 +150,7 @@ Explain how the local slice would grow to 20-50 runtimes:
 - Backup or state-recovery approach where relevant.
 - What Kubernetes, Terraform, Helm, GitOps, or cloud services would add, if you
   would use them.
-- Why you did or did not use those tools in the local work sample.
+- Why you did or didn't use those tools in the local work sample.
 
 ## 11. Security and operator controls
 
@@ -172,7 +172,7 @@ operator-facing status message, first runbook action, and closure evidence.
 
 ## 13. AI usage
 
-Link to `AI_USAGE.md`, or state that you did not use AI tools.
+Link to `AI_USAGE.md`, or state that you didn't use AI tools.
 
 If you used AI tools, include:
 
@@ -184,7 +184,7 @@ If you used AI tools, include:
 
 ## 14. Tradeoffs and omissions
 
-List what you intentionally did not build and why. Include the next changes you
+List what you intentionally didn't build and why. Include the next changes you
 would make with more time.
 
 ## 15. Follow-up defense notes
@@ -195,7 +195,7 @@ Confirm that it includes:
 
 - Three design decisions you expect to defend.
 - One thing you would redesign with more time.
-- One generated mistake you caught, or a statement that you did not use AI tools.
+- One generated mistake you caught, or a statement that you didn't use AI tools.
 - One unresolved production risk.
 - The strongest evidence artifact in your submission.
 - The most important questions you would ask before productionizing the platform.
