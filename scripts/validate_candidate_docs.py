@@ -10,9 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ARTIFACT_FILES = [
     "artifacts/index.html",
-    "artifacts/CANDIDATE_RUNBOOK.html",
-    "artifacts/HEALTH_MODEL_GUIDE.html",
-    "artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html",
 ]
 
 CANDIDATE_FILES = [
@@ -32,6 +29,12 @@ RETIRED_ROOT_HTML = [
     "CANDIDATE_RUNBOOK.html",
     "HEALTH_MODEL_GUIDE.html",
     "EVIDENCE_AND_VALIDATION_GUIDE.html",
+]
+
+RETIRED_ARTIFACT_HTML = [
+    "artifacts/CANDIDATE_RUNBOOK.html",
+    "artifacts/HEALTH_MODEL_GUIDE.html",
+    "artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html",
 ]
 
 DEVL_URLS = [
@@ -88,24 +91,21 @@ REQUIRED_ARTIFACT_PHRASES = {
         "make smoke",
         "safe-to-serve eligibility",
         "GitHub Actions",
-    ],
-    "artifacts/CANDIDATE_RUNBOOK.html": [
+        "Onboarding",
         "Clone and install",
         "Run the baseline",
         "Trigger stale bravo",
         "Recover bravo",
         "Document the health model",
         "Run final validation",
-    ],
-    "artifacts/HEALTH_MODEL_GUIDE.html": [
+        "Evaluation",
         "What We Are Testing",
         "What We Are Not Testing",
         "Health Model",
         "Fail-Closed Reasoning",
         "Follow-Up Interview Prep",
         "safe_to_serve",
-    ],
-    "artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html": [
+        "Evidence tasks",
         "SRE-001",
         "SRE-010",
         "Hard gate",
@@ -145,6 +145,9 @@ def check_required_paths() -> list[str]:
     for relative_path in RETIRED_ROOT_HTML:
         if (ROOT / relative_path).exists():
             errors.append(f"retired root HTML file still exists: {relative_path}")
+    for relative_path in RETIRED_ARTIFACT_HTML:
+        if (ROOT / relative_path).exists():
+            errors.append(f"retired split artifact HTML file still exists: {relative_path}")
     return errors
 
 

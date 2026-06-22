@@ -67,11 +67,8 @@ working.
 
 | File | Purpose |
 | --- | --- |
-| `artifacts/index.html` | Browser entry point for the candidate packet. |
+| `artifacts/index.html` | Single-page browser guide for the candidate packet. |
 | `README.md` | Authoritative assignment specification. |
-| `artifacts/CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 6-day window. |
-| `artifacts/HEALTH_MODEL_GUIDE.html` | Guidance for liveness, freshness, and blocked work. |
-| `artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html` | Guidance for proof and rerunnable commands. |
 | `SUBMISSION_TEMPLATE.md` | Structure for the final report in `SUBMISSION.md`. |
 | `SUBMISSION.md` | Your completed report. |
 | `AI_USAGE.md` | Disclosure and verification notes for AI-assisted work. |
@@ -115,8 +112,8 @@ The reviewer will stop early if a hard gate fails.
 
 ## Separate liveness from safe-to-serve
 
-Use `docs/ARCHITECTURE.md` and `artifacts/HEALTH_MODEL_GUIDE.html` to explain
-the health model.
+Use `docs/ARCHITECTURE.md` and the evaluation section in `artifacts/index.html`
+to explain the health model.
 
 At minimum, make these fields visible:
 
@@ -144,7 +141,8 @@ Include evidence for:
 - GitHub Actions validation.
 - Alert thresholds and owner/action notes.
 
-Use `artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html` to check evidence quality.
+Use the evidence task section in `artifacts/index.html` to check evidence
+quality.
 
 ## Use GitHub Actions as the delivery gate
 
