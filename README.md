@@ -1,7 +1,7 @@
 # SRE Take-Home: Market Data Freshness
 
 Open the live assignment packet first:
-<https://kmshdev.github.io/sre-work-sample/>.
+<https://kmshdev.github.io/sre-work-sample/artifacts/>.
 
 This repository is the starter template for the assignment. It gives you a small
 Python command-line application, three fictional market-data feeds, tests, and a
@@ -67,11 +67,11 @@ working.
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Browser entry point for the candidate packet. |
+| `artifacts/index.html` | Browser entry point for the candidate packet. |
 | `README.md` | Authoritative assignment specification. |
-| `CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 6-day window. |
-| `HEALTH_MODEL_GUIDE.html` | Guidance for liveness, freshness, and blocked work. |
-| `EVIDENCE_AND_VALIDATION_GUIDE.html` | Guidance for proof and rerunnable commands. |
+| `artifacts/CANDIDATE_RUNBOOK.html` | Suggested work sequence for the 6-day window. |
+| `artifacts/HEALTH_MODEL_GUIDE.html` | Guidance for liveness, freshness, and blocked work. |
+| `artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html` | Guidance for proof and rerunnable commands. |
 | `SUBMISSION_TEMPLATE.md` | Structure for the final report in `SUBMISSION.md`. |
 | `SUBMISSION.md` | Your completed report. |
 | `AI_USAGE.md` | Disclosure and verification notes for AI-assisted work. |
@@ -115,8 +115,8 @@ The reviewer will stop early if a hard gate fails.
 
 ## Separate liveness from safe-to-serve
 
-Use `docs/ARCHITECTURE.md` and `HEALTH_MODEL_GUIDE.html` to explain the health
-model.
+Use `docs/ARCHITECTURE.md` and `artifacts/HEALTH_MODEL_GUIDE.html` to explain
+the health model.
 
 At minimum, make these fields visible:
 
@@ -144,7 +144,7 @@ Include evidence for:
 - GitHub Actions validation.
 - Alert thresholds and owner/action notes.
 
-Use `EVIDENCE_AND_VALIDATION_GUIDE.html` to check evidence quality.
+Use `artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html` to check evidence quality.
 
 ## Use GitHub Actions as the delivery gate
 

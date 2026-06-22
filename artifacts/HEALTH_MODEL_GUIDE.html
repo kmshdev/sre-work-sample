@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Model Guide - Market Data Freshness</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf9f5;
+    --text: #181a1d;
+    --muted: #61666c;
+    --panel: #ffffff;
+    --line: #d9d6ce;
+    --accent: #287f71;
+    --code: #f1eee7;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.65; }
+  .layout {
+    display: grid;
+    gap: 34px;
+    grid-template-columns: 230px minmax(0, 1fr);
+    margin: 0 auto;
+    max-width: 1120px;
+    padding: 42px 22px 80px;
+  }
+  nav { align-self: start; position: sticky; top: 22px; }
+  nav a { display: block; margin: 0 0 10px; }
+  a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; margin-top: 0; }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin: 0 0 18px;
+    padding: 22px;
+  }
+  p, li { color: var(--muted); }
+  code {
+    background: var(--code);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border-top: 1px solid var(--line); padding: 10px; text-align: left; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --text: #f4f0e8;
+      --muted: #b9b2a6;
+      --panel: #171a1d;
+      --line: #30363d;
+      --accent: #8dd3c7;
+      --code: #23282c;
+    }
+  }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { position: static; }
+  }
+</style>
+</head>
+<body>
+<main class="layout">
+  <nav aria-label="Guide sections">
+    <a href="index.html">Overview</a>
+    <a href="#testing">What we test</a>
+    <a href="#not-testing">What we do not test</a>
+    <a href="#model">Health model</a>
+    <a href="#fail-closed">Fail-closed reasoning</a>
+    <a href="#follow-up">Follow-up prep</a>
+  </nav>
+
+  <article>
+    <h1>Explain the operating model, not just the code</h1>
+
+    <section id="testing">
+      <h2>What We Are Testing</h2>
+      <ul>
+        <li>Operational judgment under partial failure.</li>
+        <li>Evidence quality: can another engineer rerun the proof?</li>
+        <li>Safety decisions when market data is stale or unknown.</li>
+        <li>Restraint: solving the assignment without building a platform.</li>
+      </ul>
+    </section>
+
+    <section id="not-testing">
+      <h2>What We Are Not Testing</h2>
+      <ul>
+        <li>UI polish.</li>
+        <li>Cloud deployment.</li>
+        <li>Kubernetes or Terraform implementation.</li>
+        <li>Trading strategy.</li>
+        <li>Vendor familiarity.</li>
+      </ul>
+    </section>
+
+    <section id="model">
+      <h2>Health Model</h2>
+      <p>Expose these fields in a way the reviewer can inspect.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>alive</code></td>
+            <td>The feed consumer can answer.</td>
+          </tr>
+          <tr>
+            <td><code>last_tick_age_seconds</code></td>
+            <td>Age of the newest tick.</td>
+          </tr>
+          <tr>
+            <td><code>freshness_status</code></td>
+            <td><code>fresh</code>, <code>stale</code>, or <code>unknown</code>.</td>
+          </tr>
+          <tr>
+            <td><code>safe_to_serve</code></td>
+            <td>Whether unsafe downstream work may continue.</td>
+          </tr>
+          <tr>
+            <td><code>allowed_actions</code></td>
+            <td>Actions still allowed for the feed.</td>
+          </tr>
+          <tr>
+            <td><code>blocked_reason</code></td>
+            <td>Why unsafe work is blocked.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="fail-closed">
+      <h2>Fail-Closed Reasoning</h2>
+      <p>
+        Stale or unknown data should block unsafe actions. Fresh unaffected feeds
+        should remain eligible. Recovery requires evidence that freshness
+        returned, not only that a process restarted.
+      </p>
+    </section>
+
+    <section id="follow-up">
+      <h2>Follow-Up Interview Prep</h2>
+      <ul>
+        <li>Which stale-data alert pages, and which alert creates a ticket?</li>
+        <li>What changes when the model grows beyond three feeds?</li>
+        <li>How would a feed freshness threshold roll out safely?</li>
+        <li>Which AI suggestion did you reject or correct?</li>
+      </ul>
+    </section>
+  </article>
+</main>
+</body>
+</html>

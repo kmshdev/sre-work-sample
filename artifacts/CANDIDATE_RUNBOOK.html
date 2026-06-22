@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candidate Runbook - Market Data Freshness</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf9f5;
+    --text: #181a1d;
+    --muted: #61666c;
+    --panel: #ffffff;
+    --line: #d9d6ce;
+    --accent: #287f71;
+    --code: #f1eee7;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
+  main { margin: 0 auto; max-width: 980px; padding: 42px 22px 80px; }
+  a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; margin-bottom: 10px; }
+  h2 { margin-top: 34px; }
+  p, li { color: var(--muted); }
+  code, pre {
+    background: var(--code);
+    border-radius: 6px;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  code { padding: 1px 5px; }
+  pre { overflow-x: auto; padding: 14px; }
+  .back { margin-bottom: 26px; }
+  .progress {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin: 26px 0;
+    padding: 18px;
+  }
+  .bar { background: var(--line); border-radius: 999px; height: 10px; overflow: hidden; }
+  .bar span { background: var(--accent); display: block; height: 100%; width: 0; }
+  .checklist { counter-reset: step; display: grid; gap: 14px; padding: 0; }
+  .item {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 48px 1fr;
+    list-style: none;
+    padding: 18px;
+  }
+  .item::before {
+    align-items: center;
+    background: var(--code);
+    border-radius: 50%;
+    color: var(--accent);
+    content: counter(step);
+    counter-increment: step;
+    display: flex;
+    font-weight: 700;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+  }
+  .evidence { color: var(--text); font-weight: 650; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --text: #f4f0e8;
+      --muted: #b9b2a6;
+      --panel: #171a1d;
+      --line: #30363d;
+      --accent: #8dd3c7;
+      --code: #23282c;
+    }
+  }
+  @media (max-width: 700px) {
+    .item { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="back"><a href="index.html">Back to overview</a></p>
+  <h1>Use the checklist to pace the work</h1>
+  <p>
+    This checklist is static on purpose. Capture evidence in your repository;
+    do not rely on browser state.
+  </p>
+
+  <section class="progress" aria-label="Checklist progress">
+    <h2>Start at 0 of 8 complete</h2>
+    <p>Mark progress in your own notes or submission. The page does not store state.</p>
+    <div class="bar" aria-hidden="true"><span></span></div>
+  </section>
+
+  <ol class="checklist">
+    <li class="item">
+      <div>
+        <h2>Clone and install</h2>
+        <p>Run <code>make setup</code>.</p>
+        <p class="evidence">Evidence: setup transcript or no-error command output.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Run the baseline</h2>
+        <p>Run <code>make test</code> and <code>make smoke</code>.</p>
+        <p class="evidence">Evidence: passing tests and smoke JSON.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Trigger stale bravo</h2>
+        <pre><code>.venv/bin/python -m sre_work_sample.cli scenario stale \
+  --feed bravo \
+  --output /tmp/bravo-stale.json</code></pre>
+        <p class="evidence">Evidence: <code>bravo</code> appears in <code>unsafe_feeds</code>.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Recover bravo</h2>
+        <pre><code>.venv/bin/python -m sre_work_sample.cli recover \
+  --feed bravo \
+  --state /tmp/bravo-stale.json \
+  --output /tmp/bravo-recovered.json</code></pre>
+        <p class="evidence">Evidence: <code>overall_status</code> returns to <code>eligible</code>.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Document the health model</h2>
+        <p>Fill <code>docs/ARCHITECTURE.md</code>.</p>
+        <p class="evidence">Evidence: liveness, freshness, eligibility, and blocked actions.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Write operations evidence</h2>
+        <p>Fill <code>docs/OPERATIONS.md</code> and capture transcripts under <code>evidence/</code>.</p>
+        <p class="evidence">Evidence: trigger, detection, blocked action, and recovery.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Complete submission files</h2>
+        <p>
+          Fill <code>SUBMISSION.md</code>, <code>INCIDENT_NOTE.md</code>,
+          <code>AI_USAGE.md</code>, and <code>DEFENSE_NOTES.md</code>.
+        </p>
+        <p class="evidence">Evidence: all required links and notes are present.</p>
+      </div>
+    </li>
+    <li class="item">
+      <div>
+        <h2>Run final validation</h2>
+        <p>Run <code>make test</code>, <code>make smoke</code>, and <code>make docs-check</code>.</p>
+        <p class="evidence">Evidence: all pass before inviting <code>kmshdev</code>.</p>
+      </div>
+    </li>
+  </ol>
+</main>
+</body>
+</html>

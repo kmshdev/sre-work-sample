@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence and Validation Guide - Market Data Freshness</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf9f5;
+    --text: #181a1d;
+    --muted: #61666c;
+    --panel: #ffffff;
+    --line: #d9d6ce;
+    --accent: #287f71;
+    --code: #f1eee7;
+    --hard: #8a3a2a;
+    --depth: #5f5a12;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
+  main { margin: 0 auto; max-width: 1120px; padding: 42px 22px 80px; }
+  a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 4px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; }
+  p { color: var(--muted); }
+  code {
+    background: var(--code);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .table-wrap { overflow-x: auto; }
+  table {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-collapse: collapse;
+    min-width: 840px;
+    width: 100%;
+  }
+  th, td { border-bottom: 1px solid var(--line); padding: 12px; text-align: left; }
+  th { color: var(--muted); font-size: 13px; text-transform: uppercase; }
+  .badge {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .hard { color: var(--hard); }
+  .depth { color: var(--depth); }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --text: #f4f0e8;
+      --muted: #b9b2a6;
+      --panel: #171a1d;
+      --line: #30363d;
+      --accent: #8dd3c7;
+      --code: #23282c;
+      --hard: #ff9b8f;
+      --depth: #f2df6d;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="index.html">Back to overview</a></p>
+  <h1>Track evidence like review tasks</h1>
+  <p>
+    A submission is reviewable when each hard gate has a command, output, or
+    document the reviewer can inspect.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Task</th>
+          <th>Gate</th>
+          <th>Evidence</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SRE-001</td>
+          <td>Fresh checkout works</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td><code>make setup</code> output</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-002</td>
+          <td>Tests pass</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td><code>make test</code> output</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-003</td>
+          <td>Smoke proves baseline</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td><code>make smoke</code> output</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-004</td>
+          <td>Stale feed fails closed</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td>stale <code>bravo</code> transcript</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-005</td>
+          <td>Recovery is rerunnable</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td>recovered state transcript</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-006</td>
+          <td>GitHub Actions passes</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td>workflow run link</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-007</td>
+          <td>Incident note is credible</td>
+          <td><span class="badge hard">Hard gate</span></td>
+          <td><code>INCIDENT_NOTE.md</code></td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-008</td>
+          <td>Alert rationale is useful</td>
+          <td><span class="badge depth">Scored depth</span></td>
+          <td>page/ticket thresholds</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-009</td>
+          <td>Rollback note is concrete</td>
+          <td><span class="badge depth">Scored depth</span></td>
+          <td>bad-config scenario</td>
+          <td>Candidate fills</td>
+        </tr>
+        <tr>
+          <td>SRE-010</td>
+          <td>AI use is owned</td>
+          <td><span class="badge depth">Scored depth</span></td>
+          <td><code>AI_USAGE.md</code></td>
+          <td>Candidate fills</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>
