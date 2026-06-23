@@ -13,7 +13,7 @@ CANDIDATE_FILES = [
     "SUBMISSION.md",
     "AI_USAGE.md",
     "INCIDENT_NOTE.md",
-    "DEFENSE_NOTES.md",
+    "FOLLOWUP_NOTES.md",
     "docs/ARCHITECTURE.md",
     "docs/OPERATIONS.md",
 ]
@@ -25,7 +25,8 @@ IGNORED_HTML_DIRS = {
     "htmlcov",
 }
 
-RETIRED_HTML_FILES = [
+RETIRED_FILES = [
+    "DEFENSE_NOTES.md",
     "index.html",
     "artifacts/index.html",
     "artifacts/COMPONENT_PROVENANCE.md",
@@ -50,6 +51,7 @@ FORBIDDEN_PHRASES = [
     "release-safety scenario may count",
     "runnable or inspectable",
     "8-12 focused hours",
+    "DEFENSE_NOTES.md",
     ".eval/",
     "artifacts/index.html",
     "single-page candidate guide",
@@ -70,10 +72,15 @@ REQUIRED_README_PHRASES = [
     "make test",
     "make smoke",
     "GitHub Actions",
+    "Python 3.11+",
     "safe-to-serve eligibility",
+    "unknown data fails closed",
+    "price_order",
+    "publish_signal",
+    "rebalance_position",
     "INCIDENT_NOTE.md",
     "AI_USAGE.md",
-    "DEFENSE_NOTES.md",
+    "FOLLOWUP_NOTES.md",
 ]
 
 
@@ -89,9 +96,9 @@ def check_required_paths() -> list[str]:
     for relative_path in CANDIDATE_FILES:
         if not (ROOT / relative_path).exists():
             errors.append(f"missing required file: {relative_path}")
-    for relative_path in RETIRED_HTML_FILES:
+    for relative_path in RETIRED_FILES:
         if (ROOT / relative_path).exists():
-            errors.append(f"retired HTML artifact still exists: {relative_path}")
+            errors.append(f"retired candidate artifact still exists: {relative_path}")
     return errors
 
 

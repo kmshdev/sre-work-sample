@@ -1,8 +1,7 @@
-.PHONY: setup test smoke docs-check run clean
+.PHONY: setup test smoke docs-check clean
 
 PYTHON ?= python3
 VENV ?= .venv
-PORT ?= 8080
 
 setup:
 	$(PYTHON) -m venv $(VENV)
@@ -17,9 +16,6 @@ smoke:
 
 docs-check:
 	$(PYTHON) scripts/validate_candidate_docs.py
-
-run:
-	$(VENV)/bin/python -m sre_work_sample.server --port $(PORT)
 
 clean:
 	rm -rf $(VENV) .pytest_cache htmlcov .coverage

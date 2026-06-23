@@ -8,7 +8,13 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from sre_work_sample.freshness import evaluate_system, healthy_state, set_feed_age
+from sre_work_sample.freshness import (
+    UNSAFE_ACTIONS,
+    evaluate_system,
+    healthy_state,
+    set_feed_age,
+    set_feed_age_unknown,
+)
 
 
 def load_state(path: Path | None) -> dict[str, Any]:
@@ -40,11 +46,14 @@ def command_status(args: argparse.Namespace) -> int:
 
 def command_scenario(args: argparse.Namespace) -> int:
     """Write a scenario state file."""
-    if args.kind != "stale":
+    if args.kind == "stale":
+        next_state = set_feed_age(load_state(args.state), args.feed, args.age_seconds)
+    elif args.kind == "unknown":
+        next_state = set_feed_age_unknown(load_state(args.state), args.feed)
+    else:
         raise ValueError(f"unsupported scenario {args.kind!r}")
-    next_state = set_feed_age(load_state(args.state), args.feed, args.age_seconds)
     write_state(args.output, next_state)
-    print_json({"scenario": "stale", "feed": args.feed, "state": str(args.output)})
+    print_json({"scenario": args.kind, "feed": args.feed, "state": str(args.output)})
     return 0
 
 
@@ -67,6 +76,26 @@ def command_smoke(_: argparse.Namespace) -> int:
     stale_status = evaluate_system(stale)
     if stale_status["unsafe_feeds"] != ["bravo"]:
         raise RuntimeError("expected only bravo to be unsafe")
+    stale_feeds = {feed["name"]: feed for feed in stale_status["feeds"]}
+    if not stale_feeds["alpha"]["safe_to_serve"]:
+        raise RuntimeError("expected alpha to stay eligible while bravo is stale")
+    if not stale_feeds["charlie"]["safe_to_serve"]:
+        raise RuntimeError("expected charlie to stay eligible while bravo is stale")
+
+    unknown = set_feed_age_unknown(healthy, "bravo")
+    unknown_status = evaluate_system(unknown)
+    unknown_feeds = {feed["name"]: feed for feed in unknown_status["feeds"]}
+    unknown_bravo = unknown_feeds["bravo"]
+    if unknown_status["unsafe_feeds"] != ["bravo"]:
+        raise RuntimeError("expected only bravo to be unsafe when tick age is unknown")
+    if unknown_bravo["freshness_status"] != "unknown":
+        raise RuntimeError("expected unknown bravo freshness status")
+    if unknown_bravo["safe_to_serve"]:
+        raise RuntimeError("expected unknown bravo to fail closed")
+    if unknown_bravo["blocked_actions"] != UNSAFE_ACTIONS:
+        raise RuntimeError("expected unsafe actions to be blocked for unknown bravo")
+    if not unknown_bravo["blocked_reason"]:
+        raise RuntimeError("expected operator-readable blocked reason for unknown bravo")
 
     recovered = set_feed_age(stale, "bravo", 5)
     recovered_status = evaluate_system(recovered)
@@ -82,6 +111,7 @@ def command_smoke(_: argparse.Namespace) -> int:
             "checks": [
                 "healthy feeds eligible",
                 "stale bravo fails closed",
+                "unknown data fails closed",
                 "alpha and charlie remain eligible",
                 "bravo recovery restores eligibility",
             ],
@@ -100,7 +130,7 @@ def build_parser() -> argparse.ArgumentParser:
     status.set_defaults(func=command_status)
 
     scenario = subcommands.add_parser("scenario", help="write a scenario state")
-    scenario.add_argument("kind", choices=["stale"])
+    scenario.add_argument("kind", choices=["stale", "unknown"])
     scenario.add_argument("--feed", required=True, choices=["alpha", "bravo", "charlie"])
     scenario.add_argument("--state", type=Path)
     scenario.add_argument("--output", type=Path, required=True)

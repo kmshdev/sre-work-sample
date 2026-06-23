@@ -1,4 +1,10 @@
-from sre_work_sample.freshness import evaluate_system, healthy_state, set_feed_age
+from sre_work_sample.freshness import (
+    UNSAFE_ACTIONS,
+    evaluate_system,
+    healthy_state,
+    set_feed_age,
+    set_feed_age_unknown,
+)
 
 
 def test_healthy_feeds_are_eligible() -> None:
@@ -18,7 +24,23 @@ def test_stale_feed_fails_closed_without_blocking_fresh_feeds() -> None:
     assert status["unsafe_feeds"] == ["bravo"]
     assert feeds["bravo"]["freshness_status"] == "stale"
     assert not feeds["bravo"]["safe_to_serve"]
-    assert "price_order" in feeds["bravo"]["blocked_actions"]
+    assert feeds["bravo"]["blocked_actions"] == UNSAFE_ACTIONS
+    assert feeds["alpha"]["safe_to_serve"]
+    assert feeds["charlie"]["safe_to_serve"]
+
+
+def test_unknown_feed_age_fails_closed_without_blocking_fresh_feeds() -> None:
+    unknown_state = set_feed_age_unknown(healthy_state(), "bravo")
+    status = evaluate_system(unknown_state)
+    feeds = {feed["name"]: feed for feed in status["feeds"]}
+
+    assert status["overall_status"] == "restricted"
+    assert status["unsafe_feeds"] == ["bravo"]
+    assert feeds["bravo"]["freshness_status"] == "unknown"
+    assert feeds["bravo"]["last_tick_age_seconds"] is None
+    assert not feeds["bravo"]["safe_to_serve"]
+    assert feeds["bravo"]["blocked_actions"] == UNSAFE_ACTIONS
+    assert feeds["bravo"]["blocked_reason"] == "last tick age is unknown"
     assert feeds["alpha"]["safe_to_serve"]
     assert feeds["charlie"]["safe_to_serve"]
 

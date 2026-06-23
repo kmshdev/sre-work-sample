@@ -141,3 +141,24 @@ def set_feed_age(
     next_state = dict(state)
     next_state["feeds"] = feeds
     return next_state
+
+
+def set_feed_age_unknown(state: dict[str, Any], feed_name: str) -> dict[str, Any]:
+    """Return a copy of state with one alive feed's tick age unknown."""
+    changed = False
+    feeds = []
+
+    for feed in state.get("feeds", []):
+        copy = dict(feed)
+        if copy.get("name") == feed_name:
+            copy["alive"] = True
+            copy["last_tick_age_seconds"] = None
+            changed = True
+        feeds.append(copy)
+
+    if not changed:
+        raise ValueError(f"unknown feed {feed_name!r}")
+
+    next_state = dict(state)
+    next_state["feeds"] = feeds
+    return next_state

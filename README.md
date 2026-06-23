@@ -1,10 +1,10 @@
 # SRE Take-Home: Market Data Freshness
 
-This is the starter template for a senior SRE take-home assignment. You will
+This is the starter template for a senior SRE take-home assignment. You'll
 operate a small local market-data freshness system with three fictional feeds:
 `alpha`, `bravo`, and `charlie`.
 
-Your goal is not to build a trading platform. Your goal is to show that stale
+Your goal isn't to build a trading platform. Your goal is to show that stale
 data is detected, unsafe work fails closed, healthy feeds remain eligible, and
 recovery can be reproduced by another engineer.
 
@@ -37,6 +37,12 @@ make test
 make smoke
 ```
 
+Prerequisites:
+
+- Python 3.11+.
+- A POSIX-like shell for `make` and `scripts/smoke.sh`.
+- GitHub Actions or equivalent CI that runs setup, tests, smoke, and docs check.
+
 Expected smoke result:
 
 ```json
@@ -44,6 +50,7 @@ Expected smoke result:
   "checks": [
     "healthy feeds eligible",
     "stale bravo fails closed",
+    "unknown data fails closed",
     "alpha and charlie remain eligible",
     "bravo recovery restores eligibility"
   ],
@@ -67,6 +74,14 @@ At minimum, your implementation must show:
 - Recovery restores eligibility through a rerunnable command or workflow.
 - Tests, smoke output, GitHub Actions, and written evidence prove the behavior.
 
+Minimum implementation scope:
+
+- Keep the assignment runnable locally with Python 3.11+.
+- Preserve a CLI path for healthy, stale, unknown, and recovered states.
+- Keep `make test`, `make smoke`, and `make docs-check` passing.
+- Keep CI at least as strict as local validation: install, test, smoke, docs check.
+- Document the reliability model, runbook, alerting, automation, and tradeoffs.
+
 ## What is already in the repo
 
 | Path | Purpose |
@@ -81,7 +96,7 @@ At minimum, your implementation must show:
 | `SUBMISSION.md` | Your completed submission report. |
 | `INCIDENT_NOTE.md` | Your first-30-minute stale-feed incident note. |
 | `AI_USAGE.md` | AI tool disclosure and verification notes. |
-| `DEFENSE_NOTES.md` | Notes for follow-up technical discussion. |
+| `FOLLOWUP_NOTES.md` | Notes for follow-up technical discussion. |
 
 You may change the starter code. Keep setup, tests, smoke, and docs validation
 working from a fresh checkout.
@@ -95,12 +110,13 @@ Use this flow to prove the assignment end to end:
 3. Run `make smoke`.
 4. Show healthy status for `alpha`, `bravo`, and `charlie`.
 5. Trigger a stale `bravo` scenario.
-6. Show `bravo` is unsafe while `alpha` and `charlie` remain eligible.
-7. Recover `bravo`.
-8. Show the recovered state is eligible.
-9. Push or otherwise show GitHub Actions evidence.
-10. Complete `SUBMISSION.md`, `INCIDENT_NOTE.md`, `AI_USAGE.md`, and
-    `DEFENSE_NOTES.md`.
+6. Trigger an unknown tick-age `bravo` scenario.
+7. Show `bravo` is unsafe while `alpha` and `charlie` remain eligible.
+8. Recover `bravo`.
+9. Show the recovered state is eligible.
+10. Push or otherwise show GitHub Actions evidence.
+11. Complete `SUBMISSION.md`, `INCIDENT_NOTE.md`, `AI_USAGE.md`, and
+    `FOLLOWUP_NOTES.md`.
 
 Useful direct commands:
 
@@ -109,6 +125,10 @@ Useful direct commands:
 tmp=/tmp/bravo-stale.json
 .venv/bin/python -m sre_work_sample.cli scenario stale --feed bravo --output "$tmp"
 .venv/bin/python -m sre_work_sample.cli status --state /tmp/bravo-stale.json
+.venv/bin/python -m sre_work_sample.cli scenario unknown \
+  --feed bravo \
+  --output /tmp/bravo-unknown.json
+.venv/bin/python -m sre_work_sample.cli status --state /tmp/bravo-unknown.json
 .venv/bin/python -m sre_work_sample.cli recover \
   --feed bravo \
   --state /tmp/bravo-stale.json \
@@ -122,9 +142,10 @@ The reviewer may stop early if any hard gate fails:
 
 - Fresh checkout setup works.
 - `make test` passes.
-- `make smoke` proves healthy, stale, and recovered states.
+- `make smoke` proves healthy, stale, unknown, partial-availability, and recovered states.
 - GitHub Actions runs setup, tests, smoke, and docs validation.
 - A stale feed is detected.
+- Unknown tick age is detected.
 - Unsafe downstream work fails closed.
 - Unaffected fresh feeds remain eligible during partial failure.
 - Recovery is reproducible.
@@ -147,6 +168,22 @@ Make these fields visible in code, CLI output, tests, docs, or evidence:
 The important distinction: a process can be alive and still unsafe because its
 data is stale.
 
+Expected-state contract:
+
+| State | Required outcome |
+| --- | --- |
+| Healthy `alpha`, `bravo`, `charlie` | `freshness_status=fresh`, `safe_to_serve=true`. |
+| Stale `bravo` | `freshness_status=stale`, `safe_to_serve=false`, unsafe work blocked. |
+| Unknown `bravo` tick age | `freshness_status=unknown`, not safe, blocked reason present. |
+| Partial availability | Fresh `alpha` and `charlie` remain safe while `bravo` is unsafe. |
+| Recovered `bravo` | All feeds return to `overall_status=eligible`. |
+
+Canonical unsafe action set:
+
+- `price_order`
+- `publish_signal`
+- `rebalance_position`
+
 ## Evidence to submit
 
 Prefer command output, JSON, test output, CI links, and short notes. Evidence
@@ -156,6 +193,7 @@ Include evidence for:
 
 - Healthy baseline.
 - Stale `bravo` or another explicitly chosen feed.
+- Unknown tick-age scenario.
 - Blocked unsafe action.
 - Continued eligibility for unaffected feeds.
 - Recovery output.
@@ -179,13 +217,13 @@ operator-facing status, first runbook action, and closure evidence.
 
 Keep the review local and safe:
 
-- Do not include real secrets.
-- Do not require paid infrastructure.
-- Do not depend on real external accounts.
-- Do not connect to real trading, broker, exchange, or customer systems.
-- Do not hide failure behind restart-only recovery.
-- Do not make Kubernetes, Terraform, DNS, BGP, or cloud deployment required.
-- Do not trade operational evidence for dashboard polish.
+- Don't include real secrets.
+- Don't require paid infrastructure.
+- Don't depend on real external accounts.
+- Don't connect to real trading, broker, exchange, or customer systems.
+- Don't hide failure behind restart-only recovery.
+- Don't make Kubernetes, Terraform, DNS, BGP, or cloud deployment required.
+- Don't trade operational evidence for cosmetic polish.
 
 ## AI usage
 
@@ -200,12 +238,17 @@ If you use AI tools, complete `AI_USAGE.md` with:
 - How you caught the problem.
 - Verification you ran yourself.
 
-If you do not use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
+If you don't use AI tools, state that in `AI_USAGE.md` and `SUBMISSION.md`.
 
 ## Follow-up interview
 
 Be ready to discuss:
 
+- Reliability model: how liveness, freshness, and safe-to-serve decisions differ.
+- Incident response: how operators classify, communicate, mitigate, and close.
+- Automation, CI/CD, and recovery: how validation and rollback stay repeatable.
+- Observability and actionability: whether signals lead to clear operator actions.
+- Tradeoffs and restraint: what you intentionally avoided and why.
 - Why your model blocks unsafe work.
 - Which stale-data alert pages and which alert only creates a ticket.
 - How a freshness threshold would roll out safely.
