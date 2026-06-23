@@ -8,10 +8,8 @@ Your goal is not to build a trading platform. Your goal is to show that stale
 data is detected, unsafe work fails closed, healthy feeds remain eligible, and
 recovery can be reproduced by another engineer.
 
-Open the single-page candidate guide first:
-<https://kmshdev.github.io/sre-work-sample/artifacts/>.
-
-The assessment window is **6 calendar days**. Expect **6-8 focused hours**.
+The assessment window is **7 calendar days**. Use the window to produce a
+reviewable system, evidence, and tradeoff notes rather than a large feature set.
 
 Last reviewed: 2026-06-22.
 
@@ -53,9 +51,9 @@ Expected smoke result:
 }
 ```
 
-The browser guide at `artifacts/index.html` contains the same assignment as one
-page. Use it for navigation and review checklists. Use this README as the
-authoritative specification when instructions differ.
+This README is the assignment source of truth. Use `SUBMISSION_TEMPLATE.md` as
+the report structure, replace `SUBMISSION.md` with your completed report, and
+keep setup, tests, smoke, and docs validation working from a fresh checkout.
 
 ## What you are building
 
@@ -73,7 +71,6 @@ At minimum, your implementation must show:
 
 | Path | Purpose |
 | --- | --- |
-| `artifacts/index.html` | Single-page browser guide for the assignment. |
 | `src/sre_work_sample/` | Starter Python package and CLI entry points. |
 | `tests/` | Behavior tests for the starter freshness model. |
 | `data/healthy.json` | Simple healthy-state fixture. |

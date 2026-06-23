@@ -2,20 +2,13 @@
 
 from __future__ import annotations
 
-from html.parser import HTMLParser
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
-ARTIFACT_FILES = [
-    "artifacts/index.html",
-]
-
 CANDIDATE_FILES = [
     "README.md",
-    "index.html",
-    *ARTIFACT_FILES,
     "SUBMISSION_TEMPLATE.md",
     "SUBMISSION.md",
     "AI_USAGE.md",
@@ -25,28 +18,29 @@ CANDIDATE_FILES = [
     "docs/OPERATIONS.md",
 ]
 
-RETIRED_ROOT_HTML = [
+IGNORED_HTML_DIRS = {
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "htmlcov",
+}
+
+RETIRED_HTML_FILES = [
+    "index.html",
+    "artifacts/index.html",
+    "artifacts/COMPONENT_PROVENANCE.md",
     "CANDIDATE_RUNBOOK.html",
     "HEALTH_MODEL_GUIDE.html",
     "EVIDENCE_AND_VALIDATION_GUIDE.html",
-]
-
-RETIRED_ARTIFACT_HTML = [
     "artifacts/CANDIDATE_RUNBOOK.html",
     "artifacts/HEALTH_MODEL_GUIDE.html",
     "artifacts/EVIDENCE_AND_VALIDATION_GUIDE.html",
 ]
 
-DEVL_URLS = [
-    "https://www.devl.dev/c/timelines/changelog",
-    "https://www.devl.dev/c/tours/checklist",
-    "https://www.devl.dev/c/layouts/focus-mode",
-    "https://www.devl.dev/c/tables/issues",
-]
-
 FORBIDDEN_PHRASES = [
     "critical runtime platform",
-    "7 calendar days",
+    "6 calendar days",
+    "6-8 focused hours",
     "20-50",
     "NO_AGENT_INCIDENT.md",
     "no-agent incident",
@@ -57,13 +51,17 @@ FORBIDDEN_PHRASES = [
     "runnable or inspectable",
     "8-12 focused hours",
     ".eval/",
+    "artifacts/index.html",
+    "single-page candidate guide",
+    "browser guide",
+    "candidate-facing source of truth",
+    "kmshdev.github.io",
 ]
 
 REQUIRED_README_PHRASES = [
     "Table of contents",
-    "artifacts/index.html",
-    "6 calendar days",
-    "6-8 focused hours",
+    "7 calendar days",
+    "assignment source of truth",
     "Market Data Freshness",
     "alpha",
     "bravo",
@@ -78,57 +76,6 @@ REQUIRED_README_PHRASES = [
     "DEFENSE_NOTES.md",
 ]
 
-REQUIRED_ARTIFACT_PHRASES = {
-    "artifacts/index.html": [
-        "Market Data Freshness",
-        "Start Here",
-        "Build",
-        "Prove",
-        "Do Not Overbuild",
-        "Review Gates",
-        "make setup",
-        "make test",
-        "make smoke",
-        "safe-to-serve eligibility",
-        "GitHub Actions",
-        "Onboarding",
-        "Clone and install",
-        "Run the baseline",
-        "Trigger stale bravo",
-        "Recover bravo",
-        "Document the health model",
-        "Run final validation",
-        "Evaluation",
-        "What We Are Testing",
-        "What We Are Not Testing",
-        "Health Model",
-        "Fail-Closed Reasoning",
-        "Follow-Up Interview Prep",
-        "safe_to_serve",
-        "Evidence tasks",
-        "SRE-001",
-        "SRE-010",
-        "Hard gate",
-        "Scored depth",
-        "Candidate fills",
-    ],
-}
-
-
-class LinkParser(HTMLParser):
-    """Collect local href values from HTML."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.hrefs: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag != "a":
-            return
-        for name, value in attrs:
-            if name == "href" and value:
-                self.hrefs.append(value)
-
 
 def read_text(relative_path: str) -> str:
     path = ROOT / relative_path
@@ -139,15 +86,22 @@ def read_text(relative_path: str) -> str:
 
 def check_required_paths() -> list[str]:
     errors: list[str] = []
-    for relative_path in CANDIDATE_FILES + ["artifacts/COMPONENT_PROVENANCE.md"]:
+    for relative_path in CANDIDATE_FILES:
         if not (ROOT / relative_path).exists():
             errors.append(f"missing required file: {relative_path}")
-    for relative_path in RETIRED_ROOT_HTML:
+    for relative_path in RETIRED_HTML_FILES:
         if (ROOT / relative_path).exists():
-            errors.append(f"retired root HTML file still exists: {relative_path}")
-    for relative_path in RETIRED_ARTIFACT_HTML:
-        if (ROOT / relative_path).exists():
-            errors.append(f"retired split artifact HTML file still exists: {relative_path}")
+            errors.append(f"retired HTML artifact still exists: {relative_path}")
+    return errors
+
+
+def check_no_html_files() -> list[str]:
+    errors: list[str] = []
+    for path in ROOT.rglob("*.html"):
+        relative_parts = path.relative_to(ROOT).parts
+        if any(part in IGNORED_HTML_DIRS for part in relative_parts):
+            continue
+        errors.append(f"HTML artifact still exists: {path.relative_to(ROOT)}")
     return errors
 
 
@@ -173,7 +127,7 @@ def check_required_phrases(relative_path: str, phrases: list[str]) -> list[str]:
 
 def check_line_lengths() -> list[str]:
     errors: list[str] = []
-    for relative_path in CANDIDATE_FILES + ["artifacts/COMPONENT_PROVENANCE.md"]:
+    for relative_path in CANDIDATE_FILES:
         text = read_text(relative_path)
         for line_number, line in enumerate(text.splitlines(), start=1):
             if len(line) > 120:
@@ -183,42 +137,13 @@ def check_line_lengths() -> list[str]:
     return errors
 
 
-def check_artifact_links() -> list[str]:
-    errors: list[str] = []
-    for relative_path in ["index.html", *ARTIFACT_FILES]:
-        parser = LinkParser()
-        parser.feed(read_text(relative_path))
-        base = (ROOT / relative_path).parent
-        for href in parser.hrefs:
-            if href.startswith(("http://", "https://", "mailto:")):
-                continue
-            target = href.split("#", 1)[0]
-            if not target:
-                continue
-            if not (base / target).resolve().exists():
-                errors.append(f"{relative_path}: broken local link: {href}")
-    return errors
-
-
-def check_provenance() -> list[str]:
-    text = read_text("artifacts/COMPONENT_PROVENANCE.md")
-    return [
-        f"artifacts/COMPONENT_PROVENANCE.md: missing devl URL: {url}"
-        for url in DEVL_URLS
-        if url not in text
-    ]
-
-
 def main() -> int:
     errors = []
     errors.extend(check_required_paths())
+    errors.extend(check_no_html_files())
     errors.extend(check_forbidden_phrases())
     errors.extend(check_required_phrases("README.md", REQUIRED_README_PHRASES))
-    for relative_path, phrases in REQUIRED_ARTIFACT_PHRASES.items():
-        errors.extend(check_required_phrases(relative_path, phrases))
     errors.extend(check_line_lengths())
-    errors.extend(check_artifact_links())
-    errors.extend(check_provenance())
 
     if errors:
         print("candidate documentation validation failed")
